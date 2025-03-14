@@ -39,3 +39,4 @@ async def login(form: LoginForm, db: AsyncSession = Depends(get_db)):
         token = jwt.encode(payload, secret_key, algorithm="HS256")
         
         return {"access_token": token, "token_type": "bearer"}
+    
