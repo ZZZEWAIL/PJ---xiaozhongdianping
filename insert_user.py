@@ -1,3 +1,5 @@
+# This script inserts test users into the database. Run when adding new test data.
+
 import asyncio
 from sqlalchemy.ext.asyncio import async_sessionmaker
 from login.database import engine, async_session

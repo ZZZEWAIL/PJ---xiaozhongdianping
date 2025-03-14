@@ -1,3 +1,5 @@
+# This script creates database tables (e.g., users table). Run only when initializing or resetting the database.
+
 import asyncio
 from login.database import engine, Base
 
