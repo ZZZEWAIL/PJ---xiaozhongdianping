@@ -15,12 +15,13 @@ from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, Asyn
 from sqlalchemy.ext.declarative import declarative_base
 from urllib.parse import quote_plus
 from login.models import Base  # 确保导入 User 模型
-
-# 处理特殊字符
-password = quote_plus("Aa8629473@")
+from dotenv import load_dotenv
+import os
 
 # MySQL 连接
-SQLALCHEMY_DATABASE_URL = f"mysql+aiomysql://root:{password}@localhost:3306/xiaozhongdianping"
+load_dotenv()
+password = os.getenv("DATABASE_PASSWORD")
+SQLALCHEMY_DATABASE_URL = f"mysql+aiomysql://avnadmin:{password}@xiaozhongdianping-xiaozhongdianping.h.aivencloud.com:14983/defaultdb"
 
 # 创建异步数据库引擎
 engine = create_async_engine(SQLALCHEMY_DATABASE_URL, echo=True)
