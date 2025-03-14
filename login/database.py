@@ -14,7 +14,7 @@
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from sqlalchemy.ext.declarative import declarative_base
 from urllib.parse import quote_plus
-from login_module.models import Base  # 确保导入 User 模型
+from login.models import Base  # 确保导入 User 模型
 
 # 处理特殊字符
 password = quote_plus("Aa8629473@")

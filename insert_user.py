@@ -1,7 +1,7 @@
 import asyncio
 from sqlalchemy.ext.asyncio import async_sessionmaker
-from login_module.database import engine, async_session
-from login_module.models import User
+from login.database import engine, async_session
+from login.models import User
 import bcrypt as bc
 
 async def insert_user():

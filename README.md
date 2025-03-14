@@ -2,7 +2,7 @@
 # login_module
 - 启动服务器:
     export PYTHONPATH=.
-uvicorn login_module.main:app --reload
+uvicorn login.main:app --reload
 - 测试登陆：
     curl -X 'POST' \
   'http://127.0.0.1:8000/login' \

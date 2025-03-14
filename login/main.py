@@ -1,8 +1,8 @@
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.future import select
-from login_module.database import async_session
-from login_module.models import User
-from login_module.schema import LoginForm, Token
+from login.database import async_session
+from login.models import User
+from login.schema import LoginForm, Token
 import bcrypt as bc
 import jwt
 import datetime
