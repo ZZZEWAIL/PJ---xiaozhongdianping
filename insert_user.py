@@ -11,7 +11,7 @@ async def insert_user():
         async with session.begin():
             # 创建用户
             salt = bc.gensalt().decode('utf-8')
-            password_hash = bc.hashpw("111".encode('utf-8'), salt.encode('utf-8'))
+            password_hash = bc.hashpw("testpassword".encode('utf-8'), salt.encode('utf-8'))
             user = User(username="Ada", password_hash=password_hash.decode('utf-8'))
             session.add(user)
         await session.commit()
