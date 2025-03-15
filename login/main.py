@@ -18,9 +18,9 @@ app = FastAPI(docs_url="/docs", redoc_url="/redoc")
 # 启用 CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://127.0.0.1:5500"],  # 允许前端的源
+    allow_origins=["http://127.0.0.1:5500"],  # 允许前端端口
     allow_credentials=True,
-    allow_methods=["*"],  # 允许所有方法（包括 OPTIONS）
+    allow_methods=["*"],  # 允许所有方法，包括 OPTIONS 和 POST
     allow_headers=["*"],  # 允许所有头部
 )
 
