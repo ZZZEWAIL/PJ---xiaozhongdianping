@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>首页</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Piedra&family=Dancing+Script&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="./css/style.css">
+</head>
+
+<body>
+  <nav>
+    <ul>
+      <li><a href="index.html">首页</a></li>
+      <li><a href="#">个人中心</a></li>
+      <li><a href="login.html">登录</a></li>
+    </ul>
+  </nav>
+  <div class="vertical-nav" id="sidebar">
+    <div id="half">
+      <h1>导航</h1>
+    </div>
+    <ul>
+      <li><a href="#">菜单 1</a></li>
+      <li><a href="#">菜单 2</a></li>
+      <li><a href="#">菜单 3</a></li>
+    </ul>
+  </div>
+  <div class="page-content" id="content">
+    <div class="home-container">
+      <h1>欢迎，<span id="username"></span>！</h1>
+      <p>这是你的首页，登录时间：<span id="login-time"></span></p>
+      <button id="logout-btn">退出登录</button>
+      <div id="image">
+        <img src="https://via.placeholder.com/300" alt="示例图片">
+      </div>
+      <p class="lead">这是一个示例内容区域，可以展示更多信息。</p>
+      <div class="card-list">
+        <h3>近期活动</h3>
+        <div class="card">
+          <h4>活动 1</h4>
+          <p>这是一个示例活动描述，展示用户参与的活动信息。</p>
+        </div>
+        <div class="card">
+          <h4>活动 2</h4>
+          <p>另一个示例活动，展示更多内容。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="./js/main.js"></script>
+</body>
+
+</html>
