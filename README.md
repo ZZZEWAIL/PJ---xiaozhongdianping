@@ -9,7 +9,7 @@
   -H 'Content-Type: application/json' \
   -d '{
   "username": "Ada",
-  "password": "111"
+  "password": "testpassword"
 }'
 ### 连接 Aiven MySQL：
     mysql -h xiaozhongdianping-xiaozhongdianping.h.aivencloud.com -P 14983 -u avnadmin -p

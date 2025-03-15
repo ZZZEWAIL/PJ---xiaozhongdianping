@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Depends, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.future import select
 from login.database import async_session
 from login.models import User
@@ -10,9 +11,18 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from dotenv import load_dotenv
 import os
 
-load_dotenv()  # 加载环境变量
+load_dotenv()
 
 app = FastAPI(docs_url="/docs", redoc_url="/redoc")
+
+# 启用 CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://127.0.0.1:5500"],  # 允许前端端口
+    allow_credentials=True,
+    allow_methods=["*"],  # 允许所有方法，包括 OPTIONS 和 POST
+    allow_headers=["*"],  # 允许所有头部
+)
 
 async def get_db():
     async with async_session() as session:
@@ -35,8 +45,7 @@ async def login(form: LoginForm, db: AsyncSession = Depends(get_db)):
             "username": user.username,
             "exp": datetime.datetime.utcnow() + datetime.timedelta(minutes=30)
         }
-        secret_key = os.getenv("SECRET_KEY")  # 从环境变量中获取密钥
+        secret_key = os.getenv("SECRET_KEY")
         token = jwt.encode(payload, secret_key, algorithm="HS256")
         
         return {"access_token": token, "token_type": "bearer"}
-    
