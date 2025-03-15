@@ -2,15 +2,14 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: sans-serif;
+  font-family: 'Roboto', 'Piedra', cursive, sans-serif;
+  /* 使用 Roboto 作为主字体 */
 }
 
 body {
   background: #11998e;
   background: -webkit-linear-gradient(to right, #38ef7d, #11998e);
   background: linear-gradient(to right, #38ef7d, #11998e);
-  font-family: 'Piedra', cursive, sans-serif;
-  /* 添加后备字体 */
   min-height: 100vh;
   overflow-x: hidden;
   position: relative;
@@ -25,15 +24,14 @@ body {
 .container {
   background-color: white;
   padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   width: 100%;
   max-width: 400px;
   z-index: 1;
   margin: 0 auto;
-  /* 居中 */
   margin-top: 10vh;
-  /* 稍微下移 */
+  border: 1px solid #e0e0e0;
 }
 
 #formContent {
@@ -45,21 +43,25 @@ h2.active {
   display: inline-block;
   padding-bottom: 0.5rem;
   border-bottom: 2px solid #007bff;
+  font-size: 1.5rem;
 }
 
 h2.inactive {
   color: #999;
   display: inline-block;
   margin-left: 1rem;
+  font-size: 1.5rem;
 }
 
 .underlineHover {
   text-decoration: none;
   color: #007bff;
+  transition: color 0.3s ease;
 }
 
 .underlineHover:hover {
   text-decoration: underline;
+  color: #0056b3;
 }
 
 form {
@@ -74,8 +76,8 @@ input[type="password"] {
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 1rem;
-  font-family: sans-serif;
-  /* 确保输入框字体可见 */
+  font-family: 'Roboto', sans-serif;
+  transition: border-color 0.3s ease;
 }
 
 input[type="text"]:focus,
@@ -94,6 +96,7 @@ input[type="submit"] {
   font-size: 1rem;
   cursor: pointer;
   margin-top: 1rem;
+  transition: background-color 0.3s ease;
 }
 
 input[type="submit"]:hover {
@@ -105,8 +108,9 @@ input[type="submit"]:hover {
 }
 
 .error {
-  color: red;
+  color: #dc3545;
   margin-top: 1rem;
+  font-size: 0.9rem;
 }
 
 /* 动画效果 */
@@ -156,47 +160,53 @@ input[type="submit"]:hover {
 /* 首页样式 */
 .home-container {
   text-align: center;
-  padding: 2rem;
+  padding: 2.5rem;
   background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   width: 100%;
-  max-width: 600px;
+  max-width: 700px;
   margin: 0 auto;
-  margin-top: 20px;
+  margin-top: 30px;
+  border: 1px solid #e0e0e0;
 }
 
 h1 {
   color: #333;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
+  font-size: 2rem;
   font-family: 'Piedra', cursive, sans-serif;
 }
 
 p {
   color: #555;
   margin-bottom: 1.5rem;
-  font-family: sans-serif;
+  font-size: 1.1rem;
+  font-family: 'Roboto', sans-serif;
 }
 
 #logout-btn {
-  padding: 0.75rem 1.5rem;
+  padding: 0.75rem 2rem;
   background-color: #dc3545;
   color: white;
   border: none;
   border-radius: 4px;
   cursor: pointer;
   margin-top: 1rem;
+  font-size: 1rem;
+  transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 #logout-btn:hover {
   background-color: #c82333;
+  transform: scale(1.05);
 }
 
 /* 导航栏 */
 nav {
   width: 100%;
   height: 70px;
-  background: #010101;
+  background: linear-gradient(90deg, #1c2526, #2e3b3e);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -204,6 +214,7 @@ nav {
   top: 0;
   left: 0;
   z-index: 1000;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 }
 
 nav ul {
@@ -214,17 +225,21 @@ nav ul {
 }
 
 nav ul li {
-  margin: 0 6px;
+  margin: 0 10px;
 }
 
 nav ul li a {
   text-decoration: none;
-  color: whitesmoke;
-  padding: 10px 15px;
+  color: #e0e0e0;
+  padding: 10px 20px;
+  font-size: 1.1rem;
+  font-family: 'Roboto', sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 nav ul li a:hover {
-  background-color: #333;
+  background-color: #3e4b4e;
+  color: #ffffff;
   border-radius: 5px;
 }
 
@@ -237,10 +252,11 @@ nav ul li a:hover {
   top: 70px;
   left: 0;
   box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.1);
-  background-color: white;
-  padding-top: 1rem;
+  background-color: #f8f9fa;
+  padding-top: 1.5rem;
   overflow-y: auto;
-  transition: all 0.4s;
+  transition: all 0.4s ease;
+  border-right: 1px solid #e0e0e0;
 }
 
 .vertical-nav ul {
@@ -249,30 +265,36 @@ nav ul li a:hover {
 }
 
 .vertical-nav ul li {
-  padding: 10px 15px;
+  padding: 12px 20px;
 }
 
 .vertical-nav ul li a {
   text-decoration: none;
   color: #333;
   display: block;
+  font-size: 1.1rem;
+  font-family: 'Roboto', sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .vertical-nav ul li a:hover {
-  background-color: #f0f0f0;
+  background-color: #e9ecef;
+  color: #007bff;
 }
 
 #half {
   border: 2px solid #cc2b5e;
   text-align: center;
-  padding: 6px;
-  margin-bottom: 1rem;
+  padding: 8px;
+  margin: 0 15px 1.5rem 15px;
+  border-radius: 5px;
 }
 
 #half h1 {
   font-family: 'Dancing Script', 'Helvetica', sans-serif;
   font-weight: 800;
-  font-size: 30px;
+  font-size: 2rem;
+  color: #cc2b5e;
 }
 
 /* 内容区域 */
@@ -280,9 +302,9 @@ nav ul li a:hover {
   width: calc(100% - 17rem);
   margin-left: 17rem;
   margin-top: 70px;
-  padding: 20px;
+  padding: 30px;
   min-height: calc(100vh - 70px);
-  transition: all 0.4s;
+  transition: all 0.4s ease;
   overflow-y: auto;
 }
 
@@ -300,21 +322,24 @@ nav ul li a:hover {
   max-width: 100%;
   margin: auto;
   display: block;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 #image {
   max-width: 99%;
   height: auto;
   display: block;
-  margin: 1rem auto;
+  margin: 1.5rem auto;
 }
 
 .lead {
-  color: black;
-  font-family: 'Libre Baskerville', serif, sans-serif;
-  font-weight: bold;
+  color: #333;
+  font-family: 'Roboto', serif, sans-serif;
+  font-weight: 500;
   text-align: justify;
-  margin-top: 1rem;
+  margin-top: 1.5rem;
+  font-size: 1.1rem;
 }
 
 /* 响应式设计 */
@@ -331,6 +356,7 @@ nav ul li a:hover {
     width: 100%;
     margin-left: 0;
     margin-top: 70px;
+    padding: 20px;
   }
 
   .page-content.active {
@@ -339,17 +365,24 @@ nav ul li a:hover {
   }
 
   .home-container {
-    max-width: 90%;
+    max-width: 95%;
+    padding: 1.5rem;
   }
 
   .container {
     max-width: 90%;
+    padding: 1.5rem;
+  }
+
+  nav ul li a {
+    padding: 8px 12px;
+    font-size: 1rem;
   }
 }
 
 .separator {
   margin: 3rem 0;
-  border-bottom: 1px dashed #fff;
+  border-bottom: 1px dashed #ddd;
 }
 
 .text-uppercase {
@@ -358,4 +391,42 @@ nav ul li a:hover {
 
 .text-gray {
   color: #aaa;
+}
+
+/* 卡片列表样式 */
+.card-list {
+  margin-top: 2rem;
+  text-align: left;
+}
+
+.card-list h3 {
+  font-size: 1.5rem;
+  color: #333;
+  margin-bottom: 1rem;
+  font-family: 'Piedra', cursive, sans-serif;
+}
+
+.card {
+  background-color: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+}
+
+.card h4 {
+  font-size: 1.2rem;
+  color: #007bff;
+  margin-bottom: 0.5rem;
+  font-family: 'Roboto', sans-serif;
+}
+
+.card p {
+  font-size: 1rem;
+  color: #666;
 }
