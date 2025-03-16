@@ -1,9 +1,9 @@
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from login.database import get_db  # 从 database.py 导入 get_db
-from login.models import User
-from login.schema import LoginForm, Token
+from backend.database import get_db  # 更新导入
+from backend.models import User  # 更新导入
+from backend.schema import LoginForm, Token  # 更新导入
 import bcrypt
 import jwt
 import datetime
@@ -14,7 +14,6 @@ load_dotenv()
 
 router = APIRouter()
 
-# 登录 API
 @router.post("/login", response_model=Token)
 async def login(form: LoginForm, db: AsyncSession = Depends(get_db)):
     async with db as session:

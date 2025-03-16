@@ -1,7 +1,7 @@
 # This script creates database tables (e.g., users table). Run only when initializing or resetting the database.
 
 import asyncio
-from login.database import engine, Base
+from backend.database import engine, Base
 
 async def create_tables():
     async with engine.begin() as conn:

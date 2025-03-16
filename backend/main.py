@@ -1,18 +1,18 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from login.database import init_db
-from login.register import router as register_router  # 引入 register.py 中的路由
-from login.login import router as login_router  # 引入 login.py 中的路由
+from backend.database import init_db
+from backend.register import router as register_router  # 更新导入
+from backend.login import router as login_router  # 更新导入
 
 app = FastAPI(docs_url="/docs", redoc_url="/redoc")
 
 # 启用 CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://127.0.0.1:5500"],  # 允许前端端口
+    allow_origins=["http://127.0.0.1:5500"],
     allow_credentials=True,
-    allow_methods=["*"],  # 允许所有方法，包括 OPTIONS 和 POST
-    allow_headers=["*"],  # 允许所有头部
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # 将登录功能和注册功能路由添加到应用中

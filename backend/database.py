@@ -1,20 +1,8 @@
-# 使用云数据库
-# from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
-# from sqlalchemy.ext.declarative import declarative_base
-
-# # 使用 Aiven 提供的 Service URI
-# SQLALCHEMY_DATABASE_URL = "mysql+aiomysql://avnadmin:AVNS_KxXI48LMviHdSHRmELj@xiaozhongdianping-xiaozhongdianping.h.aivencloud.com:14983/defaultdb"
-
-# engine = create_async_engine(SQLALCHEMY_DATABASE_URL)
-# async_session = async_sessionmaker(engine, expire_on_commit=False)
-
-# Base = declarative_base()
-
-# 使用本地数据库
+# 使用远程数据库
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from sqlalchemy.ext.declarative import declarative_base
 from urllib.parse import quote_plus
-from login.models import Base  # 确保导入 User 模型
+from backend.models import Base  # 确保导入 User 模型
 from dotenv import load_dotenv
 import os
 

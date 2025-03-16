@@ -6,10 +6,10 @@ from sqlalchemy.future import select
 from pydantic import BaseModel
 import re
 import bcrypt
-from login.database import get_db  # 从 database.py 导入 get_db
-from login.models import User
-from login.schema import Token
-from login.utils import generate_captcha  # 用于生成验证码
+from backend.database import get_db
+from backend.models import User
+from backend.schema import Token
+from backend.utils import generate_captcha
 import os
 from dotenv import load_dotenv
 
@@ -32,7 +32,16 @@ def validate_password(password: str):
     if len(password) < 6 or not re.search(r"[A-Za-z]", password) or not re.search(r"\d", password):
         raise HTTPException(status_code=400, detail="Password must be at least 6 characters long and contain both letters and numbers.")
 
-# 注册 API
+# 临时存储验证码（生产环境中应使用 Redis 或数据库）
+captcha_store = {}
+
+# 获取验证码端点
+@router.get("/captcha")
+async def get_captcha():
+    captcha_text, img_str = generate_captcha()
+    captcha_store['captcha'] = captcha_text  # 存储验证码
+    return {"captcha_image": f"data:image/png;base64,{img_str}"}
+
 @router.post("/register", response_model=Token)
 async def register(form: RegisterForm, db: AsyncSession = Depends(get_db)):
     # 校验用户名格式
@@ -42,9 +51,9 @@ async def register(form: RegisterForm, db: AsyncSession = Depends(get_db)):
     validate_password(form.password)
 
     # 验证验证码
-    captcha_text, _ = generate_captcha()  # 生成验证码
-    if form.captcha != captcha_text:
+    if 'captcha' not in captcha_store or form.captcha.upper() != captcha_store['captcha'].upper():
         raise HTTPException(status_code=400, detail="Invalid captcha")
+    del captcha_store['captcha']  # 使用后删除
 
     # 检查用户名是否已存在
     result = await db.execute(select(User).where(User.username == form.username))
@@ -58,4 +67,14 @@ async def register(form: RegisterForm, db: AsyncSession = Depends(get_db)):
     # 创建新用户并保存到数据库
     new_user = User(username=form.username, password_hash=password_hash)
     db.add(new_user)
- 
+    await db.commit()
+
+    # 生成 JWT 令牌
+    payload = {
+        "username": form.username,
+        "exp": datetime.datetime.utcnow() + datetime.timedelta(minutes=30)
+    }
+    secret_key = os.getenv("SECRET_KEY")
+    token = jwt.encode(payload, secret_key, algorithm="HS256")
+
+    return {"access_token": token, "token_type": "bearer"}
