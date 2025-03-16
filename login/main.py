@@ -1,17 +1,8 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy.future import select
-from login.database import async_session
-from login.models import User
-from login.schema import LoginForm, Token
-import bcrypt as bc
-import jwt
-import datetime
-from sqlalchemy.ext.asyncio import AsyncSession
-from dotenv import load_dotenv
-import os
-
-load_dotenv()
+from login.database import init_db
+from login.register import router as register_router  # 引入 register.py 中的路由
+from login.login import router as login_router  # 引入 login.py 中的路由
 
 app = FastAPI(docs_url="/docs", redoc_url="/redoc")
 
@@ -24,28 +15,11 @@ app.add_middleware(
     allow_headers=["*"],  # 允许所有头部
 )
 
-async def get_db():
-    async with async_session() as session:
-        yield session
+# 将登录功能和注册功能路由添加到应用中
+app.include_router(register_router, prefix="/auth", tags=["auth"])
+app.include_router(login_router, prefix="/auth", tags=["auth"])
 
-@app.post("/login")
-async def login(form: LoginForm, db: AsyncSession = Depends(get_db)):
-    async with db as session:
-        result = await session.execute(select(User).where(User.username == form.username))
-        user = result.scalar()
-        if not user:
-            print("User not found")
-            raise HTTPException(status_code=401, detail="Invalid username or password")
-        
-        if not bc.checkpw(form.password.encode('utf-8'), user.password_hash.encode('utf-8')):
-            print("Invalid password")
-            raise HTTPException(status_code=401, detail="Invalid username or password")
-        
-        payload = {
-            "username": user.username,
-            "exp": datetime.datetime.utcnow() + datetime.timedelta(minutes=30)
-        }
-        secret_key = os.getenv("SECRET_KEY")
-        token = jwt.encode(payload, secret_key, algorithm="HS256")
-        
-        return {"access_token": token, "token_type": "bearer"}
+# 启动时调用数据库初始化
+@app.on_event("startup")
+async def startup():
+    await init_db()
