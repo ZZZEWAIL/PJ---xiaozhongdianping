@@ -498,3 +498,21 @@ nav ul li a:hover {
   color: #333;
   font-weight: bold;
 }
+
+.password-strength {
+  font-size: 0.9rem;
+  margin-top: 5px;
+  text-align: left;
+}
+
+.password-strength.weak {
+  color: red;
+}
+
+.password-strength.medium {
+  color: orange;
+}
+
+.password-strength.strong {
+  color: green;
+}
