@@ -1,1 +1,0 @@
-web: uvicorn login_module.main:app --host 0.0.0.0 --port $PORT
