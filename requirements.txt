@@ -1,4 +1,5 @@
 aiomysql==0.2.0
+alembic==1.15.2
 annotated-types==0.7.0
 anyio==4.8.0
 bcrypt==4.3.0
@@ -11,10 +12,20 @@ ecdsa==0.19.0
 fastapi==0.115.11
 greenlet==3.1.1
 h11==0.14.0
+httpcore==1.0.7
+httpx==0.28.1
 idna==3.10
+iniconfig==2.1.0
 Js2Py==0.74
 lxml==5.3.0
+Mako==1.3.9
+MarkupSafe==3.0.2
+mysql-connector-python==9.2.0
+numpy==2.2.4
+packaging==24.2
+pandas==2.2.3
 pillow==11.1.0
+pluggy==1.5.0
 pyasn1==0.4.8
 pycparser==2.22
 pydantic==2.10.6
@@ -23,8 +34,12 @@ PyExecJS==1.5.1
 pyjsparser==2.7.1
 PyJWT==2.10.1
 PyMySQL==1.1.1
+pytest==8.3.5
+pytest-asyncio==0.26.0
+python-dateutil==2.9.0.post0
 python-dotenv==1.0.1
 python-jose==3.4.0
+pytz==2025.1
 requests==2.32.3
 rsa==4.9
 six==1.17.0
@@ -32,6 +47,7 @@ sniffio==1.3.1
 SQLAlchemy==2.0.39
 starlette==0.46.1
 typing_extensions==4.12.2
+tzdata==2025.2
 tzlocal==5.2
 urllib3==2.3.0
 utils==1.0.2
