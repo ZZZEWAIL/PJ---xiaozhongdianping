@@ -1,93 +1,120 @@
 import pytest
 from fastapi.testclient import TestClient
-from unittest.mock import MagicMock
+from unittest.mock import AsyncMock, MagicMock
 from backend.main import app
-from backend.models import Business
+from backend.models import Shop
+from backend.database import get_db
 from sqlalchemy.ext.asyncio import AsyncSession
 
-# 创建一个测试客户端
+# 创建测试客户端
 client = TestClient(app)
 
-# Mock 数据库会话和查询
+# 工厂函数生成 Shop 对象
+def create_shop(id, name, category, rating, price_range, avg_cost):
+    return Shop(
+        id=id,
+        name=name,
+        category=category,
+        rating=rating,
+        price_range=price_range,
+        avg_cost=avg_cost,
+        address="北京市朝阳区",
+        phone="1234567890",
+        business_hours="10:00-22:00",
+        image_url=None
+    )
+
 @pytest.fixture
 def mock_db_session():
-    # 创建一个 MagicMock 对象作为数据库会话
-    mock_session = MagicMock(AsyncSession)
+    # 使用 AsyncMock 模拟 AsyncSession
+    mock_session = AsyncMock(AsyncSession)
+    
+    # 定义 mock_get_db，返回一个异步生成器
+    async def mock_get_db():
+        yield mock_session
+
+    # 应用依赖覆盖
+    app.dependency_overrides[get_db] = mock_get_db
+
     yield mock_session
-    mock_session.close()
 
-# 测试：正常的筛选请求
+    # 清理依赖覆盖
+    app.dependency_overrides.clear()
+
 @pytest.mark.asyncio
-async def test_filter_businesses(mock_db_session):
-    # 模拟数据库查询的返回值
-    mock_db_session.execute.return_value.scalars.return_value.all.return_value = [
-        Business(id=1, name="Restaurant A", rating=4.5, price=30, avg_spend=50),
-        Business(id=2, name="Restaurant B", rating=4.0, price=20, avg_spend=40)
+async def test_search_filter_shops(mock_db_session):
+    # 模拟 execute -> scalars -> all 调用链
+    mock_result = MagicMock()
+    mock_scalars = MagicMock()
+    mock_scalars.all.return_value = [
+        create_shop(1, "火锅大师", "火锅", 4.5, "￥50-100", 75.0),
+        create_shop(2, "奶茶小屋", "奶茶", 4.0, "￥10-50", 20.0)
     ]
+    mock_result.scalars.return_value = mock_scalars
+    mock_db_session.execute = AsyncMock(return_value=mock_result)
 
-    # 发送请求到 API
-    response = client.get("/business/filter?rating=4.0&price_min=20")
+    response = client.get("/api/shops/search?keyword=火锅&rating=4.0&avg_cost_min=20")
 
-    # 断言返回的状态码和数据
     assert response.status_code == 200
     assert len(response.json()) == 2
-    assert response.json()[0]['name'] == "Restaurant A"
-    assert response.json()[1]['name'] == "Restaurant B"
+    assert response.json()[0]['name'] == "火锅大师"
+    assert response.json()[1]['name'] == "奶茶小屋"
 
-# 测试：筛选请求中没有符合条件的商家
 @pytest.mark.asyncio
-async def test_filter_no_results(mock_db_session):
-    # 模拟数据库查询的返回值为空
-    mock_db_session.execute.return_value.scalars.return_value.all.return_value = []
+async def test_search_filter_no_results(mock_db_session):
+    # 模拟没有结果的情况
+    mock_result = MagicMock()
+    mock_scalars = MagicMock()
+    mock_scalars.all.return_value = []
+    mock_result.scalars.return_value = mock_scalars
+    mock_db_session.execute = AsyncMock(return_value=mock_result)
 
-    # 发送请求到 API
-    response = client.get("/business/filter?rating=5.0&price_min=100")
+    response = client.get("/api/shops/search?keyword=咖啡&rating=5.0&avg_cost_min=100")
 
-    # 断言返回的状态码和空数据
     assert response.status_code == 200
     assert response.json() == []
 
-# 测试：异常的筛选请求（传入无效的价格范围）
 @pytest.mark.asyncio
-async def test_filter_invalid_price_range(mock_db_session):
-    # 发送请求到 API，传入不合理的价格范围
-    response = client.get("/business/filter?price_min=-10&price_max=-5")
+async def test_search_filter_invalid_params(mock_db_session):
+    # 测试无效参数
+    response = client.get("/api/shops/search?keyword=火锅&rating=-1")
 
-    # 断言返回的状态码
-    assert response.status_code == 422  # FastAPI 会返回 422 错误（验证错误）
+    assert response.status_code == 422
 
-# 测试：正常的排序请求
 @pytest.mark.asyncio
-async def test_sort_businesses(mock_db_session):
-    # 模拟数据库查询的返回值
-    mock_db_session.execute.return_value.scalars.return_value.all.return_value = [
-        Business(id=1, name="Restaurant A", rating=4.5, price=30, avg_spend=50),
-        Business(id=2, name="Restaurant B", rating=4.0, price=20, avg_spend=40)
+async def test_search_sort_shops(mock_db_session):
+    # 模拟排序的情况
+    mock_result = MagicMock()
+    mock_scalars = MagicMock()
+    mock_scalars.all.return_value = [
+        create_shop(1, "火锅大师", "火锅", 4.5, "￥50-100", 75.0),
+        create_shop(2, "奶茶小屋", "奶茶", 4.0, "￥10-50", 20.0)
     ]
+    mock_result.scalars.return_value = mock_scalars
+    mock_db_session.execute = AsyncMock(return_value=mock_result)
 
-    # 发送请求到 API，按评分排序
-    response = client.get("/business/sort?sort_by=rating")
+    response = client.get("/api/shops/search?keyword=火锅&sort_by=rating&sort_order=desc")
 
-    # 断言返回的状态码和数据
     assert response.status_code == 200
     assert len(response.json()) == 2
-    assert response.json()[0]['name'] == "Restaurant A"
-    assert response.json()[1]['name'] == "Restaurant B"
+    assert response.json()[0]['name'] == "火锅大师"
+    assert response.json()[1]['name'] == "奶茶小屋"
 
-# 测试：默认排序请求
 @pytest.mark.asyncio
-async def test_sort_default(mock_db_session):
-    # 模拟数据库查询的返回值
-    mock_db_session.execute.return_value.scalars.return_value.all.return_value = [
-        Business(id=1, name="Restaurant A", rating=4.5, price=30, avg_spend=50),
-        Business(id=2, name="Restaurant B", rating=4.0, price=20, avg_spend=40)
+async def test_search_sort_default(mock_db_session):
+    # 模拟默认排序的情况
+    mock_result = MagicMock()
+    mock_scalars = MagicMock()
+    mock_scalars.all.return_value = [
+        create_shop(1, "火锅大师", "火锅", 4.5, "￥50-100", 75.0),
+        create_shop(2, "奶茶小屋", "奶茶", 4.0, "￥10-50", 20.0)
     ]
+    mock_result.scalars.return_value = mock_scalars
+    mock_db_session.execute = AsyncMock(return_value=mock_result)
 
-    # 发送请求到 API，使用默认排序（按创建时间）
-    response = client.get("/business/sort?sort_by=default")
+    response = client.get("/api/shops/search?keyword=火锅&sort_by=default&sort_order=desc")
 
-    # 断言返回的状态码和数据
     assert response.status_code == 200
     assert len(response.json()) == 2
-    assert response.json()[0]['name'] == "Restaurant A"
-    assert response.json()[1]['name'] == "Restaurant B"
+    assert response.json()[0]['name'] == "火锅大师"
+    assert response.json()[1]['name'] == "奶茶小屋"

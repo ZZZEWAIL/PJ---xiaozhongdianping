@@ -6,19 +6,21 @@ Base = declarative_base()
 
 class User(Base):
     __tablename__ = 'users'
-
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String(50), unique=True, index=True)
     password_hash = Column(String(100))
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     last_login = Column(DateTime, nullable=True)
 
-class Business(Base):
-    __tablename__ = 'businesses'
-
+class Shop(Base):
+    __tablename__ = 'shops'
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String(100))  # 商家名称
-    rating = Column(Float)  # 商家评分
-    price = Column(Float)  # 商家价格
-    avg_spend = Column(Float)  # 商家人均消费
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)  # 商家创建时间
+    name = Column(String(100), index=True, unique=True)
+    category = Column(String(50))
+    rating = Column(Float)
+    price_range = Column(String(20))
+    avg_cost = Column(Float)
+    address = Column(String(200))
+    phone = Column(String(20))
+    business_hours = Column(String(50))
+    image_url = Column(String(255), nullable=True)
