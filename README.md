@@ -10,13 +10,12 @@ SQLALCHEMY_DATABASE_URL = "mysql+aiomysql://testuser:testpassword@127.0.0.1:3306
 **部署步骤**
 1. 安装依赖：
     pip install -r requirements.txt
-2. 设置环境变量： 
-    在远程服务器上设置 .env 文件，确保 DATABASE_URL 指向远程数据库。
-3. 运行启动脚本：
+2. 运行启动脚本：
     ./start.sh
 **验证数据库表**
 在远程环境中，登录到数据库并检查表是否正确创建：
 mysql -u testuser -p -h 127.0.0.1 -P 3306 testdb
 SHOW TABLES;
-**测试**
+**测试商家搜索功能中的 排序逻辑** 
+**API端点：/shops/search**
 pytest tests/test_filter_sort.py -v
