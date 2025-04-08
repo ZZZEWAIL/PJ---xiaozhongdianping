@@ -39,6 +39,20 @@ def get_current_user(request: Request):
 
 @router.post("/login")
 async def login(form: LoginForm, response: Response, db: AsyncSession = Depends(get_db)):
+    """
+    用户登录接口。
+
+    Args:
+        form (LoginForm): 包含用户名和密码的登录表单。
+        response (Response): FastAPI 的响应对象，用于设置 Cookie。
+        db (AsyncSession): 数据库会话对象。
+
+    Returns:
+        dict: 包含登录成功消息的字典。
+
+    Raises:
+        HTTPException: 如果用户名或密码无效，则抛出 401 错误。
+    """
     async with db as session:
         # 查询用户
         result = await session.execute(select(User).where(User.username == form.username))
@@ -57,9 +71,9 @@ async def login(form: LoginForm, response: Response, db: AsyncSession = Depends(
         }
         token = jwt.encode(payload, SECRET_KEY, algorithm="HS256")
 
-        # 打印 SECRET_KEY 和生成的 token
-        print(f"SECRET_KEY used for token generation: {SECRET_KEY}")
-        print(f"Generated token: {token}")
+        # # 打印 SECRET_KEY 和生成的 token
+        # print(f"SECRET_KEY used for token generation: {SECRET_KEY}")
+        # print(f"Generated token: {token}")
         
         # 设置 HTTP-only Cookie
         response.set_cookie(
@@ -75,6 +89,15 @@ async def login(form: LoginForm, response: Response, db: AsyncSession = Depends(
     
 @router.post("/logout")
 async def logout(response: Response):
+    """
+    用户登出接口。
+
+    Args:
+        response (Response): FastAPI 的响应对象，用于清除 Cookie。
+
+    Returns:
+        dict: 包含登出成功消息的字典。
+    """
     # 清除 access_token Cookie
     response.delete_cookie("access_token")
     return {"message": "Logged out successfully"}
