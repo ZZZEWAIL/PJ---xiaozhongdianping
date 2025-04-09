@@ -1,0 +1,75 @@
+/* 全局重置样式 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Roboto', 'Piedra', cursive, sans-serif;
+}
+
+/* 全局 body 样式 */
+body {
+    background: #f0f2f5;
+    /* 柔和的灰色背景，替换之前的渐变和图片 */
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+}
+
+/* 通用动画效果 */
+.fadeInDown {
+    animation: fadeInDown 1s ease-in-out;
+}
+
+@keyframes fadeInDown {
+    0% {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fadeIn {
+    opacity: 0;
+    animation: fadeIn 0.5s forwards;
+}
+
+.fadeIn.second {
+    animation-delay: 0.2s;
+}
+
+.fadeIn.third {
+    animation-delay: 0.4s;
+}
+
+.fadeIn.fourth {
+    animation-delay: 0.6s;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* 通用文本样式 */
+.text-uppercase {
+    letter-spacing: 0.1em;
+}
+
+.text-gray {
+    color: #aaa;
+}
+
+/* 分隔线 */
+.separator {
+    margin: 3rem 0;
+    border-bottom: 1px dashed #ddd;
+}
