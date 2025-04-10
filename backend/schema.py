@@ -7,7 +7,7 @@ class LoginForm(BaseModel):
 class Token(BaseModel):
     access_token: str
     token_type: str
-    
+
 class Shop(BaseModel):
     id: int
     name: str
@@ -19,6 +19,7 @@ class Shop(BaseModel):
     phone: str
     business_hours: str
     image_url: str | None
+    image_urls: list[str] = []  # 添加图片 URL 列表字段
 
     class Config:
         from_attributes = True
