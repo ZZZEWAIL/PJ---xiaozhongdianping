@@ -2,8 +2,6 @@ document.addEventListener('DOMContentLoaded', async function () {
     const sidebar = document.querySelector('.vertical-nav');
     const content = document.querySelector('.page-content');
     const errorMessage = document.getElementById('error-message');
-    const sortBySelect = document.getElementById('sort-by');
-    const shopList = document.getElementById('shop-list');
 
     // 验证用户是否已登录
     try {
@@ -52,41 +50,6 @@ document.addEventListener('DOMContentLoaded', async function () {
             } else {
                 console.error('Logout failed');
                 alert('退出登录失败，请稍后重试');
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            alert('网络错误，请稍后重试');
-        }
-    });
-
-    // 监听排序选项变化
-    sortBySelect.addEventListener('change', async function () {
-        const sortBy = sortBySelect.value;
-        try {
-            const response = await fetch(`http://127.0.0.1:8000/api/shops/search?keyword=&sort_by=${sortBy}&sort_order=asc`, {
-                method: 'GET',
-                credentials: 'include',
-            });
-
-            if (response.ok) {
-                const shops = await response.json();
-                // 清空原有的商家列表
-                shopList.innerHTML = '<h3>商家列表</h3>';
-                // 渲染新的商家列表
-                shops.forEach(shop => {
-                    const card = document.createElement('div');
-                    card.classList.add('card');
-                    card.innerHTML = `
-                        <h4><a href="shop_detail.html?id=${shop.id}">${shop.name}</a></h4>
-                        <p>类别: ${shop.category}</p>
-                        <p>评分: ${shop.rating}</p>
-                        <p>人均消费: ${shop.avg_cost}</p>
-                    `;
-                    shopList.appendChild(card);
-                });
-            } else {
-                console.error('获取商家列表失败');
-                alert('获取商家列表失败，请稍后重试');
             }
         } catch (error) {
             console.error('Error:', error);

@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy import and_
 from backend.database import get_db
-from backend.models import Shop, SearchHistory, ShopImage
+from backend.models import Shop,SearchHistory, ShopImage
 from backend.schema import Shop as ShopSchema
 from datetime import datetime
 
@@ -77,17 +77,3 @@ async def get_search_history(db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(SearchHistory.keyword).order_by(SearchHistory.searched_at.desc()))
     history = result.scalars().all()
     return history
-
-@router.get("/shops/{shop_id}", response_model=ShopSchema)
-async def get_shop(shop_id: int, db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(Shop).where(Shop.id == shop_id))
-    shop = result.scalar()
-    if not shop:
-        raise HTTPException(status_code=404, detail="商家未找到")
-    
-    # 获取该商家的所有图片
-    images_result = await db.execute(select(ShopImage).where(ShopImage.shop_id == shop_id))
-    images = images_result.scalars().all()
-    image_urls = [image.image_url for image in images]
-    shop.image_urls = image_urls  # 假设 ShopSchema 中添加了 image_urls 字段
-    return shop

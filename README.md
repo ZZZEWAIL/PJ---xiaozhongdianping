@@ -1,5 +1,5 @@
 # 小众点评 (Xiaozhong Dianping)
-**lab2 阶段：这是一个基于 FastAPI 和前端技术实现的点评网站，支持用户认证、商家搜索和商家详情展示功能。**
+**lab2 阶段：这是一个基于 FastAPI 和前端技术实现的点评网站，支持用户认证和商家搜索功能。**
 
 **连接 Aiven MySQL**
     mysql -h xiaozhongdianping-xiaozhongdianping.h.aivencloud.com -P 14983 -u avnadmin -p
@@ -19,5 +19,3 @@ SHOW TABLES;
 **测试商家搜索功能中的 排序逻辑** 
 **API端点：/shops/search**
 pytest tests/test_filter_sort.py -v
-**访问商家详情页**
-在商家列表中，点击商家名称即可跳转到对应的商家详情页，查看商家的详细信息。
