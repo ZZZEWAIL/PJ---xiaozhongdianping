@@ -5,6 +5,7 @@ from backend.database import init_db
 from backend.register import router as register_router
 from backend.login import router as login_router
 from backend.shops import router as shops_router
+from backend.filter_sort import router as filter_sort_router
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
@@ -23,6 +24,7 @@ app.add_middleware(
 app.include_router(register_router, prefix="/auth", tags=["auth"])
 app.include_router(login_router, prefix="/auth", tags=["auth"])
 app.include_router(shops_router, prefix="/api", tags=["shops"])
+app.include_router(filter_sort_router, prefix="/api", tags=["filter_sort"])
 
 
 @app.on_event("startup")

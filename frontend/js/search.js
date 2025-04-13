@@ -1,5 +1,3 @@
-// frontend/js/search.js
-
 const API_BASE = "http://127.0.0.1:8000/api/shops/search";
 const HISTORY_API = "http://127.0.0.1:8000/api/shops/search/history";
 let lastFetchedData = [];
@@ -135,12 +133,19 @@ function applySortAndShow(page = 1) {
     params.set('page', page);
     params.set('page_size', '10');
 
+    // 设置排序参数
     if (sortValue === 'rating_desc') {
         params.set('sort_by', 'rating');
         params.set('sort_order', 'desc');
+    } else if (sortValue === 'rating_asc') {
+        params.set('sort_by', 'rating');
+        params.set('sort_order', 'asc');
     } else if (sortValue === 'avg_desc') {
         params.set('sort_by', 'avg_cost');
         params.set('sort_order', 'desc');
+    } else if (sortValue === 'avg_asc') {
+        params.set('sort_by', 'avg_cost');
+        params.set('sort_order', 'asc');
     } else {
         params.set('sort_by', 'default');
         params.set('sort_order', 'desc');
