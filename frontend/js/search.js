@@ -225,7 +225,7 @@ function showResults(response) {
     }
     data.forEach(shop => {
         const card = document.createElement('div');
-        card.className = 'result-item'; // 改为垂直排列的类名
+        card.className = 'result-item';
         card.innerHTML = `
             <div class="result-card">
                 <h5>${shop.name}</h5>
@@ -235,6 +235,10 @@ function showResults(response) {
                 <p>地址: ${shop.address}</p>
             </div>
         `;
+        // 添加点击事件，跳转到详情页
+        card.addEventListener('click', () => {
+            window.location.href = `shops_detail.html?shop_id=${shop.id}`;
+        });
         resultsContainer.appendChild(card);
     });
 
