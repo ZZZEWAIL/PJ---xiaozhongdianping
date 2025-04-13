@@ -235,3 +235,53 @@ async def clear_search_history(db: AsyncSession = Depends(get_db)):
     await db.execute(delete(SearchHistory))
     await db.commit()
     return {"message": "Search history cleared"}
+
+@router.get("/shops/{shop_id}")
+async def get_shop_detail(
+    shop_id: int,
+    image_page: int = Query(1, ge=1),  # 图片分页参数
+    image_page_size: int = Query(1, ge=1),  # 每页显示的图片数量
+    db: AsyncSession = Depends(get_db)
+):
+    # 查询商家详情
+    shop_query = select(Shop).where(Shop.id == shop_id)
+    shop_result = await db.execute(shop_query)
+    shop = shop_result.scalars().first()
+
+    if not shop:
+        raise HTTPException(status_code=404, detail="Shop not found")
+
+    # 查询关联的图片（分页）
+    image_query = select(ShopImage).where(ShopImage.shop_id == shop_id)
+    
+    # 计算图片总数
+    count_query = select(func.count()).select_from(image_query.subquery())
+    total_images_result = await db.execute(count_query)
+    total_images = total_images_result.scalar()
+
+    # 应用分页
+    image_query = image_query.offset((image_page - 1) * image_page_size).limit(image_page_size)
+    image_result = await db.execute(image_query)
+    images = image_result.scalars().all()
+
+    # 返回商家详情和分页的图片
+    return {
+        "shop": {
+            "id": shop.id,
+            "name": shop.name,
+            "category": shop.category,
+            "rating": shop.rating,
+            "price_range": shop.price_range,
+            "avg_cost": shop.avg_cost,
+            "address": shop.address,
+            "phone": shop.phone,
+            "business_hours": shop.business_hours,
+            "image_url": shop.image_url
+        },
+        "images": {
+            "total": total_images,
+            "page": image_page,
+            "page_size": image_page_size,
+            "data": [{"id": img.id, "image_url": img.image_url} for img in images]
+        }
+    }
