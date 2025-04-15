@@ -1,5 +1,3 @@
-/* frontend/css/pages/search.css */
-
 /* 搜索页面主容器 */
 .main-container {
     max-width: 1200px;
@@ -110,6 +108,14 @@
     outline: none;
     border-color: #007bff;
     box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+}
+
+#results {
+    display: flex;
+    flex-direction: row;
+    /* 明确指定 */
+    flex-wrap: wrap;
+    gap: 20px;
 }
 
 /* 结果列表：垂直排列 */

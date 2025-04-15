@@ -140,6 +140,7 @@ async def search_shops(
     page_size: int = 10,
     db: AsyncSession = Depends(get_db)
 ):
+    print(f"Received keyword: {keyword}")
     # 检查是否已存在相同的搜索历史
     existing_history = await db.execute(
         select(SearchHistory).where(SearchHistory.keyword == keyword)
@@ -191,12 +192,14 @@ async def search_shops(
     if sort_by == "rating":
         # rating 已经是 Float 类型，直接排序
         query = query.order_by(
-            Shop.rating.desc() if sort_order == "desc" else Shop.rating.asc()
+            Shop.rating.desc() if sort_order == "desc" else Shop.rating.asc(),
+            Shop.id.desc()  # 次要排序条件
         )
     elif sort_by == "avg_cost":
         # avg_cost 已经是 Float 类型，直接排序
         query = query.order_by(
-            Shop.avg_cost.desc() if sort_order == "desc" else Shop.avg_cost.asc()
+            Shop.avg_cost.desc() if sort_order == "desc" else Shop.avg_cost.asc(),
+            Shop.id.desc()  # 次要排序条件
         )
     else:
         query = query.order_by(Shop.id.desc() if sort_order == "desc" else Shop.id.asc())
@@ -213,7 +216,7 @@ async def search_shops(
     shops = result.scalars().all()
 
     # 添加日志，调试排序结果
-    print(f"Sorting by {sort_by} in {sort_order} order")
+    print(f"Received sort_by: {sort_by}, sort_order: {sort_order}")
     print(f"Sorted shops: {[(shop.name, shop.rating, shop.avg_cost) for shop in shops]}")
 
     # 返回分页数据
