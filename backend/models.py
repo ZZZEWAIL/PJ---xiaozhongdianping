@@ -21,12 +21,13 @@ class Shop(Base):
     rating = Column(Float)
     price_range = Column(String(20))
     avg_cost = Column(Float)
+    name_pinyin = Column(String(100), index=True)
+    category_pinyin = Column(String(50), index=True)  # 新增：类别拼音字段
     address = Column(String(200))
     phone = Column(String(20))
     business_hours = Column(String(50))
     image_url = Column(String(255), nullable=True)
 
-# 存储用户的搜索历史
 class SearchHistory(Base):
     __tablename__ = 'search_history'
     id = Column(Integer, primary_key=True, index=True)
