@@ -1,11 +1,12 @@
 const API_BASE = "http://127.0.0.1:8000/api/shops/search";
 const HISTORY_API = "http://127.0.0.1:8000/api/shops/search/history";
 let lastFetchedData = [];
+let currentFilters = {}; // 新增：存储当前的筛选条件
 
 function init() {
     const searchButton = document.getElementById('searchButton');
     if (searchButton) {
-        searchButton.addEventListener('click', () => handleSearch(1)); // 明确传入 page 参数
+        searchButton.addEventListener('click', () => handleSearch(1));
         console.log('Search button listener added');
     } else {
         console.error('Search button not found');
@@ -23,7 +24,7 @@ function init() {
     if (filtersForm) {
         filtersForm.addEventListener('submit', function (e) {
             e.preventDefault();
-            applyFilters(1); // 明确传入 page 参数
+            applyFilters(1);
         });
         console.log('Filters form listener added');
     } else {
@@ -32,7 +33,7 @@ function init() {
 
     const sortSelect = document.getElementById('sortSelect');
     if (sortSelect) {
-        sortSelect.addEventListener('change', () => applySortAndShow(1)); // 明确传入 page 参数
+        sortSelect.addEventListener('change', () => applySortAndShow(1));
         console.log('Sort select listener added');
     } else {
         console.error('Sort select not found');
@@ -43,7 +44,7 @@ function init() {
 
 document.addEventListener('DOMContentLoaded', init);
 
-function handleSearch(page = 1) {
+async function handleSearch(page = 1) {
     console.log('handleSearch triggered');
     const keyword = document.getElementById('searchInput').value.trim();
     if (!keyword) {
@@ -57,10 +58,23 @@ function handleSearch(page = 1) {
     resultsContainer.classList.add('loading');
 
     const params = new URLSearchParams();
-    // 直接设置 keyword，让 URLSearchParams 进行编码
     params.set('keyword', keyword);
     params.set('page', page);
     params.set('page_size', '10');
+
+    // 应用当前的筛选条件
+    if (currentFilters.ratings) {
+        params.append('ratings', currentFilters.ratings);
+    }
+    if (currentFilters.avg_cost_min) {
+        params.set('avg_cost_min', currentFilters.avg_cost_min);
+    }
+    if (currentFilters.avg_cost_max) {
+        params.set('avg_cost_max', currentFilters.avg_cost_max);
+    }
+    if (currentFilters.is_open) {
+        params.set('is_open', 'true'); // 新增：营业中筛选
+    }
 
     const sortValue = document.getElementById('sortSelect').value;
     if (sortValue === 'rating_desc') {
@@ -83,24 +97,22 @@ function handleSearch(page = 1) {
     const url = `${API_BASE}?${params.toString()}`;
     console.log('Search URL:', url);
 
-    fetch(url)
-        .then(res => {
-            if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-            return res.json();
-        })
-        .then(response => {
-            lastFetchedData = response.data;
-            resultsContainer.classList.remove('loading');
-            showResults(response);
-        })
-        .catch(err => {
-            console.error('Fetch error:', err);
-            resultsContainer.classList.remove('loading');
-            alert('搜索失败，请稍后重试');
-        });
+    try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        const response = await res.json();
+        lastFetchedData = response.data;
+        resultsContainer.classList.remove('loading');
+        showResults(response);
+        await renderSearchHistory();
+    } catch (err) {
+        console.error('Fetch error:', err);
+        resultsContainer.classList.remove('loading');
+        alert('搜索失败，请稍后重试');
+    }
 }
 
-function applyFilters(page = 1) {
+async function applyFilters(page = 1) {
     console.log('applyFilters triggered');
     lastFetchedData = [];
     const formData = new FormData(document.getElementById('filters'));
@@ -113,21 +125,44 @@ function applyFilters(page = 1) {
     console.log('Filter triggered with keyword:', keyword);
     console.log('Raw keyword (hex):', Array.from(keyword).map(c => c.charCodeAt(0).toString(16)).join(' '));
 
-    // 直接设置 keyword，让 URLSearchParams 进行编码
     params.set('keyword', keyword);
     params.set('page', page);
     params.set('page_size', '10');
 
-    for (const [key, value] of formData) {
-        if (key === 'ratings') {
-            console.log('Applying ratings filter:', value);
-            params.append('ratings', value);
-        } else if (key === 'avg_cost') {
-            console.log('Applying avg_cost filter:', value);
-            const [min, max] = value.split('-');
-            params.set('avg_cost_min', min);
-            params.set('avg_cost_max', max);
-        }
+    // 重置筛选条件
+    currentFilters = {};
+
+    // 处理多个 avg_cost 筛选条件
+    let avgCostRanges = formData.getAll('avg_cost'); // 获取所有 avg_cost 值
+    if (avgCostRanges.length > 0) {
+        let minCost = Infinity;
+        let maxCost = -Infinity;
+        avgCostRanges.forEach(range => {
+            const [min, max] = range.split('-').map(Number);
+            minCost = Math.min(minCost, min);
+            maxCost = Math.max(maxCost, max);
+        });
+        console.log('Applying avg_cost filter: min=', minCost, 'max=', maxCost);
+        params.set('avg_cost_min', minCost);
+        params.set('avg_cost_max', maxCost);
+        currentFilters.avg_cost_min = minCost;
+        currentFilters.avg_cost_max = maxCost;
+    }
+
+    // 处理 ratings 筛选
+    const ratings = formData.get('ratings');
+    if (ratings) {
+        console.log('Applying ratings filter:', ratings);
+        params.append('ratings', ratings);
+        currentFilters.ratings = ratings;
+    }
+
+    // 处理 is_open 筛选
+    const isOpen = formData.get('is_open');
+    if (isOpen === 'true') {
+        console.log('Applying is_open filter:', isOpen);
+        params.set('is_open', 'true');
+        currentFilters.is_open = true;
     }
 
     const sortValue = document.getElementById('sortSelect').value;
@@ -153,24 +188,22 @@ function applyFilters(page = 1) {
 
     const url = `${API_BASE}?${params.toString()}`;
     console.log('Filter URL:', url);
-    fetch(url)
-        .then(res => {
-            if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-            return res.json();
-        })
-        .then(response => {
-            lastFetchedData = response.data;
-            resultsContainer.classList.remove('loading');
-            showResults(response);
-        })
-        .catch(err => {
-            console.error('Filter fetch error:', err);
-            resultsContainer.classList.remove('loading');
-            alert('筛选失败，请稍后重试');
-        });
+    try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        const response = await res.json();
+        lastFetchedData = response.data;
+        resultsContainer.classList.remove('loading');
+        showResults(response);
+        await renderSearchHistory();
+    } catch (err) {
+        console.error('Filter fetch error:', err);
+        resultsContainer.classList.remove('loading');
+        alert('筛选失败，请稍后重试');
+    }
 }
 
-function applySortAndShow(page = 1) {
+async function applySortAndShow(page = 1) {
     console.log('applySortAndShow triggered');
     lastFetchedData = [];
     const sortValue = document.getElementById('sortSelect').value;
@@ -183,10 +216,23 @@ function applySortAndShow(page = 1) {
     console.log('Raw keyword (hex):', Array.from(keyword).map(c => c.charCodeAt(0).toString(16)).join(' '));
 
     const params = new URLSearchParams();
-    // 直接设置 keyword，让 URLSearchParams 进行编码
     params.set('keyword', keyword);
     params.set('page', page);
     params.set('page_size', '10');
+
+    // 应用当前的筛选条件
+    if (currentFilters.ratings) {
+        params.append('ratings', currentFilters.ratings);
+    }
+    if (currentFilters.avg_cost_min) {
+        params.set('avg_cost_min', currentFilters.avg_cost_min);
+    }
+    if (currentFilters.avg_cost_max) {
+        params.set('avg_cost_max', currentFilters.avg_cost_max);
+    }
+    if (currentFilters.is_open) {
+        params.set('is_open', 'true'); // 新增：营业中筛选
+    }
 
     if (sortValue === 'rating_desc') {
         params.set('sort_by', 'rating');
@@ -211,62 +257,75 @@ function applySortAndShow(page = 1) {
     const resultsContainer = document.getElementById('results');
     resultsContainer.classList.add('loading');
 
-    fetch(url)
-        .then(res => {
-            if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-            return res.json();
-        })
-        .then(response => {
-            lastFetchedData = response.data;
-            resultsContainer.classList.remove('loading');
-            showResults(response);
-        })
-        .catch(err => {
-            console.error('Sort fetch error:', err);
-            resultsContainer.classList.remove('loading');
-            alert('排序失败，请稍后重试');
-        });
+    try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        const response = await res.json();
+        lastFetchedData = response.data;
+        resultsContainer.classList.remove('loading');
+        showResults(response);
+        await renderSearchHistory();
+    } catch (err) {
+        console.error('Sort fetch error:', err);
+        resultsContainer.classList.remove('loading');
+        alert('排序失败，请稍后重试');
+    }
 }
 
-function renderSearchHistory() {
+async function renderSearchHistory() {
     console.log('renderSearchHistory triggered');
-    fetch(HISTORY_API)
-        .then(res => {
-            if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-            return res.json();
-        })
-        .then(history => {
-            const listEl = document.getElementById('historyList');
-            listEl.innerHTML = '';
-            history.forEach(keyword => {
-                const li = document.createElement('li');
-                li.textContent = keyword;
-                li.onclick = () => {
-                    console.log('Setting search input to:', keyword);
-                    console.log('Raw keyword (hex):', Array.from(keyword).map(c => c.charCodeAt(0).toString(16)).join(' '));
-                    document.getElementById('searchInput').value = keyword;
-                    handleSearch(1);
-                };
-                listEl.appendChild(li);
-            });
-        })
-        .catch(err => {
-            console.error('History fetch error:', err);
+    try {
+        const res = await fetch(HISTORY_API);
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        const history = await res.json();
+        console.log('Search history:', history);
+
+        const listEl = document.getElementById('historyList');
+        if (!listEl) {
+            console.error('History list element not found');
+            return;
+        }
+
+        listEl.innerHTML = '';
+        if (history.length === 0) {
+            listEl.innerHTML = '<p>暂无搜索历史</p>';
+            return;
+        }
+
+        history.forEach(keyword => {
+            const li = document.createElement('li');
+            li.textContent = keyword;
+            li.style.cursor = 'pointer';
+            li.style.padding = '5px';
+            li.style.borderBottom = '1px solid #ddd';
+            li.onclick = () => {
+                console.log('Setting search input to:', keyword);
+                console.log('Raw keyword (hex):', Array.from(keyword).map(c => c.charCodeAt(0).toString(16)).join(' '));
+                document.getElementById('searchInput').value = keyword;
+                handleSearch(1);
+            };
+            listEl.appendChild(li);
         });
+    } catch (err) {
+        console.error('History fetch error:', err);
+        const listEl = document.getElementById('historyList');
+        if (listEl) {
+            listEl.innerHTML = '<p>加载历史记录失败</p>';
+        }
+    }
 }
 
-function clearSearchHistory() {
+async function clearSearchHistory() {
     console.log('clearSearchHistory triggered');
-    fetch(HISTORY_API, { method: 'DELETE' })
-        .then(res => {
-            if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-            alert('搜索历史已清除');
-            renderSearchHistory();
-        })
-        .catch(err => {
-            console.error('Clear history error:', err);
-            alert('清除历史失败，请稍后重试');
-        });
+    try {
+        const res = await fetch(HISTORY_API, { method: 'DELETE' });
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        alert('搜索历史已清除');
+        await renderSearchHistory();
+    } catch (err) {
+        console.error('Clear history error:', err);
+        alert('清除历史失败，请稍后重试');
+    }
 }
 
 function showResults(response) {
@@ -303,7 +362,6 @@ function showResults(response) {
         resultsContainer.appendChild(card);
     });
 
-    // 显示分页导航
     const paginationContainer = document.getElementById('pagination');
     paginationContainer.innerHTML = '';
     const total = response.total;
@@ -317,7 +375,6 @@ function showResults(response) {
         const ul = document.createElement('ul');
         ul.className = 'pagination justify-content-center';
 
-        // 上一页
         const prevLi = document.createElement('li');
         prevLi.className = `page-item ${page === 1 ? 'disabled' : ''}`;
         const prevLink = document.createElement('a');
@@ -327,13 +384,12 @@ function showResults(response) {
         prevLink.onclick = (e) => {
             e.preventDefault();
             if (page > 1) {
-                handleSearch(page - 1); // 正确传递页码
+                handleSearch(page - 1);
             }
         };
         prevLi.appendChild(prevLink);
         ul.appendChild(prevLi);
 
-        // 页码
         for (let i = 1; i <= totalPages; i++) {
             const li = document.createElement('li');
             li.className = `page-item ${i === page ? 'active' : ''}`;
@@ -343,13 +399,12 @@ function showResults(response) {
             link.textContent = i;
             link.onclick = (e) => {
                 e.preventDefault();
-                handleSearch(i); // 正确传递页码
+                handleSearch(i);
             };
             li.appendChild(link);
             ul.appendChild(li);
         }
 
-        // 下一页
         const nextLi = document.createElement('li');
         nextLi.className = `page-item ${page === totalPages ? 'disabled' : ''}`;
         const nextLink = document.createElement('a');
@@ -359,7 +414,7 @@ function showResults(response) {
         nextLink.onclick = (e) => {
             e.preventDefault();
             if (page < totalPages) {
-                handleSearch(page + 1); // 正确传递页码
+                handleSearch(page + 1);
             }
         };
         nextLi.appendChild(nextLink);
