@@ -15,109 +15,7 @@ current_time = datetime.now(timezone(timedelta(hours=8)))
 
 router = APIRouter()
 
-# @router.get("/shops/search")
-# async def search_shops(
-#     keyword: str,
-#     categories: list[str] = Query(None),
-#     ratings: list[float] = Query(None),
-#     category: str | None = None,
-#     rating: float | None = Query(None, gt=0.0, le=5.0),
-#     avg_cost_min: float | None = Query(None, gt=0),
-#     avg_cost_max: float | None = Query(None, gt=0),
-#     sort_by: str = Query('default', regex="^(default|rating|avg_cost)$"),
-#     sort_order: str = Query('desc', regex="^(asc|desc)$"),
-#     page: int = 1,
-#     page_size: int = 10,
-#     db: AsyncSession = Depends(get_db)
-# ):
-#     print(f"Received keyword: {keyword}")
-#     # 检查是否已存在相同的搜索历史
-#     existing_history = await db.execute(
-#         select(SearchHistory).where(SearchHistory.keyword == keyword)
-#     )
-#     existing_history = existing_history.scalars().first()
-
-#     if existing_history:
-#         existing_history.searched_at = datetime.utcnow()
-#         await db.commit()
-#         await db.refresh(existing_history)  # 确保对象状态刷新
-#     else:
-#         new_history = SearchHistory(keyword=keyword)
-#         db.add(new_history)
-#         await db.commit()
-#         await db.refresh(new_history)  # 确保对象状态刷新
-
-#     # 将关键字转换为拼音（无音调）
-#     keyword_pinyin_list = pinyin(keyword, style=Style.NORMAL)
-#     keyword_pinyin = ' '.join([item[0] for item in keyword_pinyin_list])
-#     print(f"Keyword pinyin: {keyword_pinyin}")
-
-#     # 初始化查询：匹配名称、分类、名称拼音或分类拼音
-#     query = select(Shop).where(
-#         (Shop.name.ilike(f"%{keyword}%")) |
-#         (Shop.category.ilike(f"%{keyword}%")) |
-#         (Shop.name_pinyin.ilike(f"%{keyword_pinyin}%")) |
-#         (Shop.category_pinyin.ilike(f"%{keyword_pinyin}%"))
-#     )
-
-#     # 应用筛选条件
-#     if category:
-#         query = query.where(Shop.category == category)
-#     if rating:
-#         query = query.where(Shop.rating >= rating)
-#     if categories:
-#         query = query.where(Shop.category.in_(categories))
-#     if ratings:
-#         print(f"Applying ratings filter: {ratings}")
-#         if ratings:
-#             query = query.where(Shop.rating >= ratings[0])
-#     if avg_cost_min:
-#         print(f"Applying avg_cost_min filter: {avg_cost_min}")
-#         query = query.where(Shop.avg_cost >= avg_cost_min)
-#     if avg_cost_max:
-#         print(f"Applying avg_cost_max filter: {avg_cost_max}")
-#         query = query.where(Shop.avg_cost <= avg_cost_max)
-
-#     # 应用排序
-#     print(f"Sorting parameters: sort_by={sort_by}, sort_order={sort_order}")
-#     if sort_by == 'rating':
-#         if sort_order == 'desc':
-#             query = query.order_by(Shop.rating.desc())
-#         else:
-#             query = query.order_by(Shop.rating.asc())
-#     elif sort_by == 'avg_cost':
-#         if sort_order == 'desc':
-#             query = query.order_by(Shop.avg_cost.desc())
-#         else:
-#             query = query.order_by(Shop.avg_cost.asc())
-#     else:
-#         if sort_order == 'desc':
-#             query = query.order_by(Shop.id.desc())
-#         else:
-#             query = query.order_by(Shop.id.asc())
-
-#     # 计算总数
-#     count_query = query.with_only_columns(func.count()).order_by(None)
-#     total = await db.scalar(count_query)
-
-#     # 分页
-#     query = query.offset((page - 1) * page_size).limit(page_size)
-#     result = await db.execute(query)
-#     shops = result.scalars().all()
-#     print(f"Sorted shops: {[shop.name for shop in shops]}")
-
-#     return {
-#         "total": total,
-#         "page": page,
-#         "page_size": page_size,
-#         "data": shops
-#     }
-
 def is_shop_open(business_hours: str, current_time: datetime) -> bool:
-    """
-    判断当前时间是否在营业时间内。
-    business_hours 格式为 "HH:MM-HH:MM"，例如 "9:00-22:00"。
-    """
     try:
         open_time_str, close_time_str = business_hours.split('-')
         open_hour, open_minute = map(int, open_time_str.split(':'))
@@ -127,7 +25,6 @@ def is_shop_open(business_hours: str, current_time: datetime) -> bool:
         close_time = time(close_hour, close_minute)
         current_time_only = time(current_time.hour, current_time.minute)
         
-        # 处理跨天营业的情况（例如 22:00-2:00）
         if close_time < open_time:
             return current_time_only >= open_time or current_time_only <= close_time
         else:
@@ -145,7 +42,7 @@ async def search_shops(
     rating: float | None = Query(None, gt=0.0, le=5.0),
     avg_cost_min: float | None = Query(None, gt=0),
     avg_cost_max: float | None = Query(None, gt=0),
-    is_open: bool | None = Query(None),  # 新增：营业中筛选条件
+    is_open: bool | None = Query(None),
     sort_by: str = Query('default', regex="^(default|rating|avg_cost)$"),
     sort_order: str = Query('desc', regex="^(asc|desc)$"),
     page: int = 1,
@@ -153,7 +50,6 @@ async def search_shops(
     db: AsyncSession = Depends(get_db)
 ):
     print(f"Received keyword: {keyword}")
-    # 保存搜索历史
     existing_history = await db.execute(
         select(SearchHistory).where(SearchHistory.keyword == keyword)
     )
@@ -173,7 +69,6 @@ async def search_shops(
     keyword_pinyin = ' '.join([item[0] for item in keyword_pinyin_list])
     print(f"Keyword pinyin: {keyword_pinyin}")
 
-    # 初始化查询
     query = select(Shop).where(
         (Shop.name.ilike(f"%{keyword}%")) |
         (Shop.category.ilike(f"%{keyword}%")) |
@@ -181,7 +76,6 @@ async def search_shops(
         (Shop.category_pinyin.ilike(f"%{keyword_pinyin}%"))
     )
 
-    # 应用筛选条件
     if category:
         query = query.where(Shop.category == category)
     if rating:
@@ -198,10 +92,9 @@ async def search_shops(
     if avg_cost_max:
         print(f"Applying avg_cost_max filter: {avg_cost_max}")
         query = query.where(Shop.avg_cost <= avg_cost_max)
-    if is_open is True:  # 新增：营业中筛选
+    if is_open is True:
         print("Applying is_open filter")
-        current_time = datetime.utcnow()  # 注意：可能需要调整为本地时间
-        # 获取所有商家，逐个检查营业时间
+        current_time = datetime.utcnow()
         result = await db.execute(query)
         shops = result.scalars().all()
         open_shop_ids = [
@@ -211,9 +104,8 @@ async def search_shops(
         if open_shop_ids:
             query = query.where(Shop.id.in_(open_shop_ids))
         else:
-            query = query.where(Shop.id == -1)  # 没有营业中的商家，返回空结果
+            query = query.where(Shop.id == -1)
 
-    # 应用排序
     print(f"Sorting parameters: sort_by={sort_by}, sort_order={sort_order}")
     if sort_by == 'rating':
         if sort_order == 'desc':
@@ -231,21 +123,48 @@ async def search_shops(
         else:
             query = query.order_by(Shop.id.asc())
 
-    # 计算总数
     count_query = query.with_only_columns(func.count()).order_by(None)
     total = await db.scalar(count_query)
 
-    # 分页
     query = query.offset((page - 1) * page_size).limit(page_size)
     result = await db.execute(query)
     shops = result.scalars().all()
     print(f"Sorted shops: {[shop.name for shop in shops]}")
 
+    # 查询每个商家的所有图片
+    shop_data = []
+    current_time = datetime.utcnow()
+    for shop in shops:
+        # 查询该商家的所有图片
+        image_query = select(ShopImage).where(ShopImage.shop_id == shop.id)
+        image_result = await db.execute(image_query)
+        images = image_result.scalars().all()
+        image_urls = [image.image_url for image in images] if images else ["https://via.placeholder.com/150"]
+
+        # 判断是否营业中
+        is_open_now = is_shop_open(shop.business_hours, current_time)
+
+        shop_data.append({
+            "id": shop.id,
+            "name": shop.name,
+            "category": shop.category,
+            "rating": shop.rating,
+            "price_range": shop.price_range,
+            "avg_cost": shop.avg_cost,
+            "name_pinyin": shop.name_pinyin,
+            "category_pinyin": shop.category_pinyin,
+            "address": shop.address,
+            "phone": shop.phone,
+            "business_hours": shop.business_hours,
+            "image_urls": image_urls,  # 返回所有图片URL
+            "is_open": is_open_now
+        })
+
     return {
         "total": total,
         "page": page,
         "page_size": page_size,
-        "data": shops
+        "data": shop_data
     }
 
 @router.get("/shops/search/history", response_model=list[str])

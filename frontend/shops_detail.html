@@ -5,28 +5,73 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>商家详情</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
     <link rel="stylesheet" href="./css/pages/shops_detail.css">
 </head>
 
 <body>
-    <div class="container">
-        <h2>商家详情</h2>
-        <div id="shop-detail">
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="#">
+                <i class="bi bi-shop me-2"></i> 小众点评
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu"
+                aria-controls="navMenu" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div id="navMenu" class="collapse navbar-collapse">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="search.html">首页</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">附近商家</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">关于我们</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <div class="container mt-4">
+        <h2 class="mb-4 text-center">商家详情</h2>
+        <div id="shop-detail" class="card-style p-4 mb-4">
             <!-- 商家信息将动态填充 -->
         </div>
         <div id="shop-images">
-            <h3>店铺图片</h3>
-            <div id="image-container">
-                <!-- 图片将动态填充 -->
+            <h3 class="mb-3">店铺图片</h3>
+            <div id="image-container" class="carousel slide" data-bs-ride="carousel">
+                <div class="carousel-inner">
+                    <!-- 图片将动态填充 -->
+                </div>
+                <button class="carousel-control-prev" type="button" data-bs-target="#image-container"
+                    data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Previous</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#image-container"
+                    data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Next</span>
+                </button>
             </div>
-            <div class="pagination">
-                <button id="prev-image" disabled>上一页</button>
-                <span id="image-page-info"></span>
-                <button id="next-image">下一页</button>
+            <div class="pagination mt-3">
+                <button id="prev-image" class="btn btn-primary me-2" disabled>上一页</button>
+                <span id="image-page-info" class="page-info"></span>
+                <button id="next-image" class="btn btn-primary ms-2">下一页</button>
             </div>
         </div>
-        <a href="search.html">返回搜索页面</a>
+        <a href="search.html" class="btn btn-outline-primary mt-4 d-block mx-auto" style="max-width: 200px;">
+            <i class="bi bi-arrow-left me-1"></i> 返回搜索页面
+        </a>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="./js/shops_detail.js"></script>
     <script>
         console.log('shops_detail.html loaded');

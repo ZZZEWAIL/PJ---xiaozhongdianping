@@ -274,19 +274,19 @@ async function applySortAndShow(page = 1) {
 
 async function renderSearchHistory() {
     console.log('renderSearchHistory triggered');
+    const listEl = document.getElementById('historyList');
+    if (!listEl) {
+        console.error('History list element not found');
+        return;
+    }
+
+    listEl.innerHTML = '';
     try {
-        const res = await fetch(HISTORY_API);
+        const res = await fetch(`${API_BASE}/history`);
         if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
         const history = await res.json();
         console.log('Search history:', history);
 
-        const listEl = document.getElementById('historyList');
-        if (!listEl) {
-            console.error('History list element not found');
-            return;
-        }
-
-        listEl.innerHTML = '';
         if (history.length === 0) {
             listEl.innerHTML = '<p>暂无搜索历史</p>';
             return;
@@ -294,26 +294,32 @@ async function renderSearchHistory() {
 
         history.forEach(keyword => {
             const li = document.createElement('li');
-            li.textContent = keyword;
-            li.style.cursor = 'pointer';
-            li.style.padding = '5px';
-            li.style.borderBottom = '1px solid #ddd';
-            li.onclick = () => {
+            li.innerHTML = `
+                <span class="history-keyword">${keyword}</span>
+                <span class="delete-btn"><i class="bi bi-x-circle"></i></span>
+            `;
+            // 为词条内容绑定搜索事件
+            const keywordSpan = li.querySelector('.history-keyword');
+            keywordSpan.addEventListener('click', () => {
                 console.log('Setting search input to:', keyword);
                 console.log('Raw keyword (hex):', Array.from(keyword).map(c => c.charCodeAt(0).toString(16)).join(' '));
                 document.getElementById('searchInput').value = keyword;
                 handleSearch(1);
-            };
+            });
+            // 为删除按钮绑定删除事件
+            const deleteBtn = li.querySelector('.delete-btn');
+            deleteBtn.addEventListener('click', (e) => {
+                e.stopPropagation(); // 阻止事件冒泡
+                deleteHistoryItem(keyword);
+            });
             listEl.appendChild(li);
         });
     } catch (err) {
         console.error('History fetch error:', err);
-        const listEl = document.getElementById('historyList');
-        if (listEl) {
-            listEl.innerHTML = '<p>加载历史记录失败</p>';
-        }
+        listEl.innerHTML = '<p>加载历史记录失败</p>';
     }
 }
+
 
 async function clearSearchHistory() {
     console.log('clearSearchHistory triggered');
@@ -343,16 +349,36 @@ function showResults(response) {
         rating: shop.rating,
         avg_cost: shop.avg_cost
     })));
-    data.forEach(shop => {
+    data.forEach((shop, shopIndex) => {
         const card = document.createElement('div');
         card.className = 'result-item';
         card.innerHTML = `
             <div class="result-card">
+                <!-- 轮播图 -->
+                <div id="carousel-${shopIndex}" class="carousel slide" data-bs-ride="carousel">
+                    <div class="carousel-inner">
+                        ${shop.image_urls.map((url, index) => `
+                            <div class="carousel-item ${index === 0 ? 'active' : ''}">
+                                <img src="${url}" class="d-block w-100 shop-image" alt="${shop.name} - Image ${index + 1}">
+                            </div>
+                        `).join('')}
+                    </div>
+                    <!-- 轮播控件 -->
+                    <button class="carousel-control-prev" type="button" data-bs-target="#carousel-${shopIndex}" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Previous</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#carousel-${shopIndex}" data-bs-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Next</span>
+                    </button>
+                </div>
                 <h5>${shop.name}</h5>
                 <p>类别: ${shop.category}</p>
                 <p>评分: ${shop.rating}</p>
                 <p>人均消费: ￥${shop.avg_cost}</p>
                 <p>地址: ${shop.address}</p>
+                ${shop.is_open ? '<span class="open-badge">营业中</span>' : ''}
             </div>
         `;
         card.addEventListener('click', () => {
