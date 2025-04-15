@@ -51,12 +51,38 @@ function handleSearch(page = 1) {
         return;
     }
     console.log('Search triggered with keyword:', keyword);
+    console.log('Raw keyword (hex):', Array.from(keyword).map(c => c.charCodeAt(0).toString(16)).join(' '));
 
     const resultsContainer = document.getElementById('results');
     resultsContainer.classList.add('loading');
 
-    const url = `${API_BASE}?keyword=${encodeURIComponent(keyword)}&page=${page}&page_size=10`;
+    const params = new URLSearchParams();
+    // 直接设置 keyword，让 URLSearchParams 进行编码
+    params.set('keyword', keyword);
+    params.set('page', page);
+    params.set('page_size', '10');
+
+    const sortValue = document.getElementById('sortSelect').value;
+    if (sortValue === 'rating_desc') {
+        params.set('sort_by', 'rating');
+        params.set('sort_order', 'desc');
+    } else if (sortValue === 'rating_asc') {
+        params.set('sort_by', 'rating');
+        params.set('sort_order', 'asc');
+    } else if (sortValue === 'avg_desc') {
+        params.set('sort_by', 'avg_cost');
+        params.set('sort_order', 'desc');
+    } else if (sortValue === 'avg_asc') {
+        params.set('sort_by', 'avg_cost');
+        params.set('sort_order', 'asc');
+    } else {
+        params.set('sort_by', 'default');
+        params.set('sort_order', 'desc');
+    }
+
+    const url = `${API_BASE}?${params.toString()}`;
     console.log('Search URL:', url);
+
     fetch(url)
         .then(res => {
             if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
@@ -76,6 +102,7 @@ function handleSearch(page = 1) {
 
 function applyFilters(page = 1) {
     console.log('applyFilters triggered');
+    lastFetchedData = [];
     const formData = new FormData(document.getElementById('filters'));
     const params = new URLSearchParams();
     const keyword = document.getElementById('searchInput').value.trim();
@@ -83,18 +110,42 @@ function applyFilters(page = 1) {
         alert('请输入搜索关键字');
         return;
     }
-    params.set('keyword', encodeURIComponent(keyword));
+    console.log('Filter triggered with keyword:', keyword);
+    console.log('Raw keyword (hex):', Array.from(keyword).map(c => c.charCodeAt(0).toString(16)).join(' '));
+
+    // 直接设置 keyword，让 URLSearchParams 进行编码
+    params.set('keyword', keyword);
     params.set('page', page);
     params.set('page_size', '10');
 
     for (const [key, value] of formData) {
         if (key === 'ratings') {
+            console.log('Applying ratings filter:', value);
             params.append('ratings', value);
         } else if (key === 'avg_cost') {
+            console.log('Applying avg_cost filter:', value);
             const [min, max] = value.split('-');
             params.set('avg_cost_min', min);
             params.set('avg_cost_max', max);
         }
+    }
+
+    const sortValue = document.getElementById('sortSelect').value;
+    if (sortValue === 'rating_desc') {
+        params.set('sort_by', 'rating');
+        params.set('sort_order', 'desc');
+    } else if (sortValue === 'rating_asc') {
+        params.set('sort_by', 'rating');
+        params.set('sort_order', 'asc');
+    } else if (sortValue === 'avg_desc') {
+        params.set('sort_by', 'avg_cost');
+        params.set('sort_order', 'desc');
+    } else if (sortValue === 'avg_asc') {
+        params.set('sort_by', 'avg_cost');
+        params.set('sort_order', 'asc');
+    } else {
+        params.set('sort_by', 'default');
+        params.set('sort_order', 'desc');
     }
 
     const resultsContainer = document.getElementById('results');
@@ -121,19 +172,22 @@ function applyFilters(page = 1) {
 
 function applySortAndShow(page = 1) {
     console.log('applySortAndShow triggered');
+    lastFetchedData = [];
     const sortValue = document.getElementById('sortSelect').value;
     const keyword = document.getElementById('searchInput').value.trim();
     if (!keyword) {
         alert('请输入搜索关键字');
         return;
     }
+    console.log('Sort triggered with keyword:', keyword);
+    console.log('Raw keyword (hex):', Array.from(keyword).map(c => c.charCodeAt(0).toString(16)).join(' '));
 
     const params = new URLSearchParams();
-    params.set('keyword', encodeURIComponent(keyword));
+    // 直接设置 keyword，让 URLSearchParams 进行编码
+    params.set('keyword', keyword);
     params.set('page', page);
     params.set('page_size', '10');
 
-    // 设置排序参数
     if (sortValue === 'rating_desc') {
         params.set('sort_by', 'rating');
         params.set('sort_order', 'desc');
@@ -188,8 +242,10 @@ function renderSearchHistory() {
                 const li = document.createElement('li');
                 li.textContent = keyword;
                 li.onclick = () => {
+                    console.log('Setting search input to:', keyword);
+                    console.log('Raw keyword (hex):', Array.from(keyword).map(c => c.charCodeAt(0).toString(16)).join(' '));
                     document.getElementById('searchInput').value = keyword;
-                    handleSearch(1); // 明确传入 page 参数
+                    handleSearch(1);
                 };
                 listEl.appendChild(li);
             });
@@ -223,6 +279,11 @@ function showResults(response) {
         resultsContainer.innerHTML = '<p>暂无结果</p>';
         return;
     }
+    console.log('Rendering shops in order:', data.map(shop => ({
+        name: shop.name,
+        rating: shop.rating,
+        avg_cost: shop.avg_cost
+    })));
     data.forEach(shop => {
         const card = document.createElement('div');
         card.className = 'result-item';
@@ -235,8 +296,8 @@ function showResults(response) {
                 <p>地址: ${shop.address}</p>
             </div>
         `;
-        // 添加点击事件，跳转到详情页
         card.addEventListener('click', () => {
+            console.log('Navigating to shop_id:', shop.id);
             window.location.href = `shops_detail.html?shop_id=${shop.id}`;
         });
         resultsContainer.appendChild(card);

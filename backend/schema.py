@@ -15,6 +15,8 @@ class Shop(BaseModel):
     rating: float
     price_range: str
     avg_cost: float
+    name_pinyin: str # 新增
+    category_pinyin: str  # 新增
     address: str
     phone: str
     business_hours: str

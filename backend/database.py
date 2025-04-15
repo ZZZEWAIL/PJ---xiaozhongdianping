@@ -18,11 +18,14 @@ engine = create_async_engine(
     echo=True
 )
 
-# 创建同步引擎（用于创建数据库）
+# 创建同步引擎（用于创建数据库和同步会话）
 sync_engine = create_engine(DATABASE_URL_SYNC, echo=True)
 
 # 创建异步会话工厂
 async_session = async_sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
+
+# 创建同步会话工厂（新增）
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=sync_engine)
 
 def create_database():
     """检查并创建数据库（如果不存在）"""
