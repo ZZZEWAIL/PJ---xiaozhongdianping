@@ -158,68 +158,53 @@ async def search_shops(
     # 初始化查询
     query = select(Shop).where(Shop.name.ilike(f"%{keyword}%") | Shop.category.ilike(f"%{keyword}%"))
 
-    # 初始化筛选条件
-    filters = []
-
-    # 处理类别筛选（支持单选和多选）
-    if categories:
-        filters.append(Shop.category.in_(categories))
-    elif category:
-        filters.append(Shop.category == category)
-
-    # 处理评分筛选（支持单选和多选）
-    if ratings:
-        filters.append(Shop.rating.in_(ratings))
-    elif rating:
-        filters.append(Shop.rating >= rating)
-
-    # 处理人均消费筛选
-    if avg_cost_min:
-        filters.append(Shop.avg_cost >= avg_cost_min)
-    if avg_cost_max:
-        filters.append(Shop.avg_cost <= avg_cost_max)
-
     # 应用筛选条件
-    if filters:
-        query = query.filter(and_(*filters))
+    if category:
+        query = query.where(Shop.category == category)
+    if rating:
+        query = query.where(Shop.rating >= rating)
+    if categories:
+        query = query.where(Shop.category.in_(categories))
+    if ratings:
+        print(f"Applying ratings filter: {ratings}")
+        if ratings:  # 确保 ratings 不为空
+            # 使用 >= 逻辑，而不是 in_ 逻辑
+            query = query.where(Shop.rating >= ratings[0])
+    if avg_cost_min:
+        print(f"Applying avg_cost_min filter: {avg_cost_min}")
+        query = query.where(Shop.avg_cost >= avg_cost_min)
+    if avg_cost_max:
+        print(f"Applying avg_cost_max filter: {avg_cost_max}")
+        query = query.where(Shop.avg_cost <= avg_cost_max)
+
+    # 应用排序
+    print(f"Sorting parameters: sort_by={sort_by}, sort_order={sort_order}")
+    if sort_by == 'rating':
+        if sort_order == 'desc':
+            query = query.order_by(Shop.rating.desc())
+        else:
+            query = query.order_by(Shop.rating.asc())
+    elif sort_by == 'avg_cost':
+        if sort_order == 'desc':
+            query = query.order_by(Shop.avg_cost.desc())
+        else:
+            query = query.order_by(Shop.avg_cost.asc())
+    else:
+        if sort_order == 'desc':
+            query = query.order_by(Shop.id.desc())
+        else:
+            query = query.order_by(Shop.id.asc())
 
     # 计算总数
-    count_query = select(func.count()).select_from(query.subquery())
-    total_result = await db.execute(count_query)
-    total = total_result.scalar()
-
-    # 排序
-    if sort_by == "rating":
-        # rating 已经是 Float 类型，直接排序
-        query = query.order_by(
-            Shop.rating.desc() if sort_order == "desc" else Shop.rating.asc(),
-            Shop.id.desc()  # 次要排序条件
-        )
-    elif sort_by == "avg_cost":
-        # avg_cost 已经是 Float 类型，直接排序
-        query = query.order_by(
-            Shop.avg_cost.desc() if sort_order == "desc" else Shop.avg_cost.asc(),
-            Shop.id.desc()  # 次要排序条件
-        )
-    else:
-        query = query.order_by(Shop.id.desc() if sort_order == "desc" else Shop.id.asc())
-
-    # 验证分页参数
-    if page < 1:
-        raise HTTPException(status_code=400, detail="Page must be greater than or equal to 1")
-    if page_size < 1:
-        raise HTTPException(status_code=400, detail="Page size must be greater than or equal to 1")
+    count_query = query.with_only_columns(func.count()).order_by(None)
+    total = await db.scalar(count_query)
 
     # 分页
     query = query.offset((page - 1) * page_size).limit(page_size)
     result = await db.execute(query)
     shops = result.scalars().all()
+    print(f"Sorted shops: {[shop.name for shop in shops]}")
 
-    # 添加日志，调试排序结果
-    print(f"Received sort_by: {sort_by}, sort_order: {sort_order}")
-    print(f"Sorted shops: {[(shop.name, shop.rating, shop.avg_cost) for shop in shops]}")
-
-    # 返回分页数据
     return {
         "total": total,
         "page": page,

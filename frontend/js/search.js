@@ -113,16 +113,17 @@ function applyFilters(page = 1) {
     console.log('Filter triggered with keyword:', keyword);
     console.log('Raw keyword (hex):', Array.from(keyword).map(c => c.charCodeAt(0).toString(16)).join(' '));
 
-    const encodedKeyword = encodeURIComponent(keyword);
-    console.log('Encoded keyword:', encodedKeyword);
-    params.set('keyword', encodedKeyword);
+    // 直接设置 keyword，让 URLSearchParams 进行编码
+    params.set('keyword', keyword);
     params.set('page', page);
     params.set('page_size', '10');
 
     for (const [key, value] of formData) {
         if (key === 'ratings') {
+            console.log('Applying ratings filter:', value);
             params.append('ratings', value);
         } else if (key === 'avg_cost') {
+            console.log('Applying avg_cost filter:', value);
             const [min, max] = value.split('-');
             params.set('avg_cost_min', min);
             params.set('avg_cost_max', max);
@@ -182,9 +183,8 @@ function applySortAndShow(page = 1) {
     console.log('Raw keyword (hex):', Array.from(keyword).map(c => c.charCodeAt(0).toString(16)).join(' '));
 
     const params = new URLSearchParams();
-    const encodedKeyword = encodeURIComponent(keyword);
-    console.log('Encoded keyword:', encodedKeyword);
-    params.set('keyword', encodedKeyword);
+    // 直接设置 keyword，让 URLSearchParams 进行编码
+    params.set('keyword', keyword);
     params.set('page', page);
     params.set('page_size', '10');
 
