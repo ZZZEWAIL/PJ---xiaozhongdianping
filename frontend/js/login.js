@@ -87,7 +87,5 @@ document.addEventListener('DOMContentLoaded', async function () {
                 alert('网络错误，请稍后重试');
             }
         });
-    } else {
-        console.error('Logout button not found');
-    }
+    } 
 });

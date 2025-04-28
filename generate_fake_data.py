@@ -1,10 +1,11 @@
 from sqlalchemy.orm import Session
-from backend.models import Shop, ShopImage
-from backend.database import SessionLocal
+from backend.models import Shop, ShopImage, Package
+from backend.database import SessionLocal, init_db, close_engine
 from pypinyin import pinyin, Style
 from faker import Faker
 from sqlalchemy.sql import text
 import random
+import asyncio
 
 fake = Faker('zh_CN')
 
@@ -19,6 +20,15 @@ sample_images = [
     "https://images.unsplash.com/photo-1504672281656-e4981d70414b?q=80&w=800&auto=format&fit=crop"
 ]
 
+# 示例套餐内容
+package_contents = [
+    "包含：主菜+饮品",
+    "包含：双人套餐+甜点",
+    "包含：单人餐+小份沙拉",
+    "包含：饮品+小吃",
+    "包含：三人套餐+汤"
+]
+
 def generate_unique_shop_name(existing_names, suffix_options):
     max_attempts = 100
     for _ in range(max_attempts):
@@ -30,21 +40,26 @@ def generate_unique_shop_name(existing_names, suffix_options):
             return shop_name
     raise ValueError("Unable to generate a unique shop name after maximum attempts")
 
-def generate_fake_shops_and_images():
+async def generate_fake_data_async():
+    # 确保数据库表已创建
+    await init_db()
+
     db: Session = SessionLocal()
     try:
         # 禁用外键约束
         db.execute(text("SET FOREIGN_KEY_CHECKS = 0;"))
         
-        # 清空表并验证
+        # 清空表
         db.execute(text("TRUNCATE TABLE shop_images;"))
         db.execute(text("TRUNCATE TABLE shops;"))
         db.execute(text("TRUNCATE TABLE search_history;"))
+        db.execute(text("TRUNCATE TABLE packages;"))
         
         # 验证是否清空成功
         shop_count = db.execute(text("SELECT COUNT(*) FROM shops;")).scalar()
-        if shop_count != 0:
-            raise RuntimeError("Failed to truncate shops table: table not empty")
+        package_count = db.execute(text("SELECT COUNT(*) FROM packages;")).scalar()
+        if shop_count != 0 or package_count != 0:
+            raise RuntimeError(f"Failed to truncate tables: shops={shop_count}, packages={package_count}")
         
         db.execute(text("SET FOREIGN_KEY_CHECKS = 1;"))
         db.commit()
@@ -84,23 +99,44 @@ def generate_fake_shops_and_images():
             db.add(shop)
             db.flush()
 
-            # 为每个商家生成至少三张图片（允许重复）
-            num_images = random.randint(3, 5)  # 随机生成3到5张图片
+            # 为每个商家生成至少三张图片
+            num_images = random.randint(3, 5)
             for j in range(num_images):
                 shop_image = ShopImage(
                     shop_id=shop.id,
-                    image_url=random.choice(sample_images)  # 允许重复选择图片
+                    image_url=random.choice(sample_images)
                 )
                 db.add(shop_image)
 
-            print(f"Added shop: {shop.name} with pinyin: {shop.name_pinyin}, category: {shop.category}, category_pinyin: {shop.category_pinyin}, {num_images} images")
+            # 为每个商家生成 1-3 个团购套餐
+            num_packages = random.randint(1, 3)
+            for k in range(num_packages):
+                package = Package(
+                    title=f"{shop.category}套餐-{k+1}",
+                    price=round(random.uniform(10, 100), 2),
+                    description=f"{shop.category}特色套餐，适合{k+1}人享用",
+                    contents=random.choice(package_contents),
+                    sales=random.randint(0, 200),
+                    shop_id=shop.id
+                )
+                db.add(package)
+
+            print(f"Added shop: {shop.name} with pinyin: {shop.name_pinyin}, category: {shop.category}, category_pinyin: {shop.category_pinyin}, {num_images} images, {num_packages} packages")
 
         db.commit()
+
+        # 验证插入结果
+        shop_count = db.execute(text("SELECT COUNT(*) FROM shops;")).scalar()
+        package_count = db.execute(text("SELECT COUNT(*) FROM packages;")).scalar()
+        print(f"Successfully inserted {shop_count} shops and {package_count} packages.")
+
     except Exception as e:
         print(f"Error: {e}")
         db.rollback()
     finally:
         db.close()
+        # 清理异步引擎
+        await close_engine()
 
 if __name__ == "__main__":
-    generate_fake_shops_and_images()
+    asyncio.run(generate_fake_data_async())

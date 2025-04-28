@@ -24,37 +24,47 @@ sync_engine = create_engine(DATABASE_URL_SYNC, echo=True)
 # 创建异步会话工厂
 async_session = async_sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
 
-# 创建同步会话工厂（新增）
+# 创建同步会话工厂
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=sync_engine)
 
 def create_database():
     """检查并创建数据库（如果不存在）"""
     database_name = SQLALCHEMY_DATABASE_URL.split("/")[-1]
     with sync_engine.connect() as connection:
-        # 使用 text() 包装 SQL 字符串
         connection.execute(text(f"CREATE DATABASE IF NOT EXISTS {database_name}"))
         connection.execute(text(f"USE {database_name}"))
 
 async def init_db():
     """初始化数据库"""
-    create_database()  # 确保数据库存在
-    async with engine.begin() as conn:
-        # 创建表
-        await conn.run_sync(Base.metadata.create_all)
+    create_database()
+    print("Database created or already exists.")
 
-        # 执行 SQL 文件
-        sql_file_path = os.path.join(os.path.dirname(__file__), "../sql/init_data.sql")
-        with open(sql_file_path, "r", encoding="utf-8") as file:
-            sql_script = file.read()
-        
-        # 分割 SQL 脚本并逐条执行
-        for statement in sql_script.split(";"):
-            statement = statement.strip()
-            if statement:  # 跳过空语句
-                await conn.execute(text(statement))  # 使用 text() 包装 SQL 语句
+    async with engine.begin() as conn:
+        # 获取当前存在的表
+        existing_tables = await conn.run_sync(lambda sync_conn: sync_conn.execute(
+            text("SHOW TABLES;")
+        ).fetchall())
+        existing_tables = [table[0] for table in existing_tables]
+        print(f"Existing tables before creation: {existing_tables}")
+
+        # 创建所有表（仅创建不存在的表）
+        await conn.run_sync(Base.metadata.create_all)
+        print("Table creation completed.")
+
+        # 再次检查表，确保创建成功
+        existing_tables = await conn.run_sync(lambda sync_conn: sync_conn.execute(
+            text("SHOW TABLES;")
+        ).fetchall())
+        existing_tables = [table[0] for table in existing_tables]
+        print(f"Existing tables after creation: {existing_tables}")
 
 # 定义 get_db 方法
 async def get_db():
     """获取数据库会话"""
     async with async_session() as session:
         yield session
+
+# 清理异步引擎（避免事件循环问题）
+async def close_engine():
+    """关闭异步引擎"""
+    await engine.dispose()

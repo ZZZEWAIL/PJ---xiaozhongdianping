@@ -31,7 +31,9 @@ app.include_router(filter_sort_router, prefix="/api", tags=["filter_sort"])
 async def startup():
     # 自动运行 Alembic 迁移
     subprocess.run(["alembic", "upgrade", "head"])
+    print("Starting database initialization...")
     await init_db()
+    print("Database initialization completed.")
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request, exc):

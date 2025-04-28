@@ -1,17 +1,37 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from sqlalchemy import and_, func
-from sqlalchemy import Float
+from sqlalchemy import and_, func, Float
+from sqlalchemy import join
 from backend.database import get_db
-from backend.models import Shop, SearchHistory, ShopImage
-from backend.schema import Shop as ShopSchema
-from datetime import datetime
+from backend.models import Shop, SearchHistory, ShopImage, Package, Order
+from backend.schema import Shop as ShopSchema, Package as PackageSchema, Order as OrderSchema
+from backend.login import get_current_user  # 导入 get_current_user
+from datetime import datetime, timezone, timedelta, time
 from sqlalchemy import delete
-from pypinyin import pinyin, Style  # 新增：导入 pypinyin
-from datetime import timezone, timedelta, time
-from datetime import datetime
-current_time = datetime.now(timezone(timedelta(hours=8)))
+from pypinyin import pinyin, Style
+from typing import List, Dict, Any
+
+# 提取分页逻辑
+async def paginate_query(
+    db: AsyncSession,
+    query,
+    page: int,
+    page_size: int
+) -> Dict[str, Any]:
+    count_query = query.with_only_columns(func.count()).order_by(None)
+    total = await db.scalar(count_query)
+
+    query = query.offset((page - 1) * page_size).limit(page_size)
+    result = await db.execute(query)
+    items = result.scalars().all()
+
+    return {
+        "total": total,
+        "page": page,
+        "page_size": page_size,
+        "data": items
+    }
 
 router = APIRouter()
 
@@ -123,25 +143,17 @@ async def search_shops(
         else:
             query = query.order_by(Shop.id.asc())
 
-    count_query = query.with_only_columns(func.count()).order_by(None)
-    total = await db.scalar(count_query)
+    result = await paginate_query(db, query, page, page_size)
+    shops = result["data"]
 
-    query = query.offset((page - 1) * page_size).limit(page_size)
-    result = await db.execute(query)
-    shops = result.scalars().all()
-    print(f"Sorted shops: {[shop.name for shop in shops]}")
-
-    # 查询每个商家的所有图片
     shop_data = []
     current_time = datetime.utcnow()
     for shop in shops:
-        # 查询该商家的所有图片
         image_query = select(ShopImage).where(ShopImage.shop_id == shop.id)
         image_result = await db.execute(image_query)
         images = image_result.scalars().all()
         image_urls = [image.image_url for image in images] if images else ["https://via.placeholder.com/150"]
 
-        # 判断是否营业中
         is_open_now = is_shop_open(shop.business_hours, current_time)
 
         shop_data.append({
@@ -156,20 +168,20 @@ async def search_shops(
             "address": shop.address,
             "phone": shop.phone,
             "business_hours": shop.business_hours,
-            "image_urls": image_urls,  # 返回所有图片URL
+            "image_urls": image_urls,
             "is_open": is_open_now
         })
 
     return {
-        "total": total,
-        "page": page,
-        "page_size": page_size,
+        "total": result["total"],
+        "page": result["page"],
+        "page_size": result["page_size"],
         "data": shop_data
     }
 
 @router.get("/shops/search/history", response_model=list[str])
 async def get_search_history(
-    limit: int = Query(10, ge=1, le=50),  # 添加 limit 参数
+    limit: int = Query(10, ge=1, le=50),
     db: AsyncSession = Depends(get_db)
 ):
     result = await db.execute(
@@ -189,11 +201,10 @@ async def clear_search_history(db: AsyncSession = Depends(get_db)):
 @router.get("/shops/{shop_id}")
 async def get_shop_detail(
     shop_id: int,
-    image_page: int = Query(1, ge=1),  # 图片分页参数
-    image_page_size: int = Query(1, ge=1),  # 每页显示的图片数量
+    image_page: int = Query(1, ge=1),
+    image_page_size: int = Query(1, ge=1),
     db: AsyncSession = Depends(get_db)
 ):
-    # 查询商家详情
     shop_query = select(Shop).where(Shop.id == shop_id)
     shop_result = await db.execute(shop_query)
     shop = shop_result.scalars().first()
@@ -201,20 +212,15 @@ async def get_shop_detail(
     if not shop:
         raise HTTPException(status_code=404, detail="Shop not found")
 
-    # 查询关联的图片（分页）
     image_query = select(ShopImage).where(ShopImage.shop_id == shop_id)
-    
-    # 计算图片总数
     count_query = select(func.count()).select_from(image_query.subquery())
     total_images_result = await db.execute(count_query)
     total_images = total_images_result.scalar()
 
-    # 应用分页
     image_query = image_query.offset((image_page - 1) * image_page_size).limit(image_page_size)
     image_result = await db.execute(image_query)
     images = image_result.scalars().all()
 
-    # 返回商家详情和分页的图片
     return {
         "shop": {
             "id": shop.id,
@@ -235,3 +241,96 @@ async def get_shop_detail(
             "data": [{"id": img.id, "image_url": img.image_url} for img in images]
         }
     }
+
+@router.get("/shops/{shop_id}/packages", response_model=List[PackageSchema])
+async def get_shop_packages(
+    shop_id: int,
+    db: AsyncSession = Depends(get_db)
+):
+    query = select(Package).where(Package.shop_id == shop_id)
+    result = await db.execute(query)
+    packages = result.scalars().all()
+
+    if not packages:
+        return []
+
+    return packages
+
+@router.get("/packages/{package_id}", response_model=PackageSchema)
+async def get_package_detail(
+    package_id: int,
+    db: AsyncSession = Depends(get_db)
+):
+    query = select(Package).where(Package.id == package_id)
+    result = await db.execute(query)
+    package = result.scalars().first()
+
+    if not package:
+        raise HTTPException(status_code=404, detail="Package not found")
+
+    return package
+
+@router.get("/user/orders", response_model=Dict[str, Any])
+async def get_user_orders(
+    request: Request,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(10, ge=1),
+    db: AsyncSession = Depends(get_db),
+    current_user: Dict[str, any] = Depends(get_current_user)
+):
+    user_id = current_user["id"]
+    query = (
+        select(Order, Package.title, Shop.name)
+        .join(Package, Order.package_id == Package.id)
+        .join(Shop, Package.shop_id == Shop.id)
+        .where(Order.user_id == user_id)
+        .order_by(Order.created_at.desc())
+    )
+
+    result = await paginate_query(db, query, page, page_size)
+    orders = result["data"]
+
+    order_data = [
+        OrderSchema(
+            package_title=order[1],
+            created_at=order[0].created_at,
+            shop_name=order[2]
+        )
+        for order in orders
+    ]
+
+    return {
+        "total": result["total"],
+        "page": result["page"],
+        "page_size": result["page_size"],
+        "data": order_data
+    }
+
+@router.get("/orders/{order_id}", response_model=OrderSchema)
+async def get_order_detail(
+    order_id: int,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+    current_user: Dict[str, any] = Depends(get_current_user)
+):
+    user_id = current_user["id"]
+    query = (
+        select(Order, Package.title, Shop.name)
+        .join(Package, Order.package_id == Package.id)
+        .join(Shop, Package.shop_id == Shop.id)
+        .where(Order.id == order_id)
+        .where(Order.user_id == user_id)
+    )
+
+    result = await db.execute(query)
+    order = result.first()
+
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found or not authorized")
+
+    return OrderSchema(
+        package_title=order[1],
+        created_at=order[0].created_at,
+        shop_name=order[2],
+        voucher_code=order[0].voucher_code
+    )
