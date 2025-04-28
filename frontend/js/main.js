@@ -7,12 +7,17 @@ document.addEventListener('DOMContentLoaded', async function () {
     try {
         const response = await fetch('http://127.0.0.1:8000/auth/protected-endpoint', {
             method: 'GET',
-            credentials: 'include', // 确保请求携带 Cookie
+            credentials: 'include',
         });
 
         if (!response.ok) {
-            // 如果未登录或身份验证失败，跳转到登录页面
-            window.location.href = 'login.html';
+            // 如果未登录或身份验证失败，显示提示
+            if (errorMessage) {
+                errorMessage.textContent = '请先登录';
+            }
+            setTimeout(() => {
+                window.location.href = 'login.html';
+            }, 2000); // 延迟 2 秒后跳转
             return;
         }
 
@@ -23,14 +28,18 @@ document.addEventListener('DOMContentLoaded', async function () {
         document.getElementById('login-time').textContent = new Date().toLocaleString();
     } catch (error) {
         console.error('Error:', error);
-        errorMessage.textContent = '网络错误，请稍后重试';
-        window.location.href = 'login.html';
+        if (errorMessage) {
+            errorMessage.textContent = '网络错误，请稍后重试';
+        }
+        setTimeout(() => {
+            window.location.href = 'login.html';
+        }, 2000);
         return;
     }
 
     // 切换侧边栏
     document.querySelector('nav').addEventListener('click', function (e) {
-        if (e.target.tagName === 'A') return; // 防止点击链接时触发
+        if (e.target.tagName === 'A') return;
         sidebar.classList.toggle('active');
         content.classList.toggle('active');
     });
@@ -38,14 +47,12 @@ document.addEventListener('DOMContentLoaded', async function () {
     // 退出登录
     document.getElementById('logout-btn').addEventListener('click', async function () {
         try {
-            // 调用后端的登出接口，清除 Cookie
             const response = await fetch('http://127.0.0.1:8000/auth/logout', {
                 method: 'POST',
-                credentials: 'include', // 确保请求携带 Cookie
+                credentials: 'include',
             });
 
             if (response.ok) {
-                // 跳转到登录页面
                 window.location.href = 'login.html';
             } else {
                 console.error('Logout failed');
