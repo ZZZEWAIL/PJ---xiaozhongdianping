@@ -135,14 +135,6 @@ function handlePurchase() {
         return;
     }
 
-    // 检查用户是否登录
-    const token = localStorage.getItem('token');
-    if (!token) {
-        alert('请先登录后再购买');
-        window.location.href = 'login.html?redirect=' + encodeURIComponent(window.location.href);
-        return;
-    }
-
     // 跳转到确认订单页面
     window.location.href = `order_confirm.html?package_id=${packageId}`;
 }
