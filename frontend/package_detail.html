@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>套餐详情</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
+    <link rel="stylesheet" href="./css/pages/package_detail.css">
+</head>
+
+<body>
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="#">
+                <i class="bi bi-shop me-2"></i> 小众点评
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu" aria-controls="navMenu" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div id="navMenu" class="collapse navbar-collapse">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="search.html">首页</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">附近商家</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="my_orders.html">我的订单</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <div class="container mt-4">
+        <h2 class="mb-4 text-center">套餐详情</h2>
+
+        <div id="package-loading" class="text-center my-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">加载中...</span>
+            </div>
+            <p class="mt-2">正在加载套餐信息...</p>
+        </div>
+
+        <div id="package-container" class="card-style p-4 mb-4" style="display: none;">
+            <div class="row">
+                <div class="col-md-8">
+                    <h3 id="package-title" class="mb-3"></h3>
+                    <div class="badge bg-primary fs-6 mb-3" id="package-sales">已售 0 份</div>
+                    <h4 class="text-danger mb-3" id="package-price">¥0.00</h4>
+                    <div class="mb-4">
+                        <h5>套餐描述</h5>
+                        <p id="package-description" class="text-muted"></p>
+                    </div>
+                    <div class="mb-4">
+                        <h5>套餐内容</h5>
+                        <ul id="package-contents" class="list-group">
+                            <!-- 套餐内容将动态填充 -->
+                        </ul>
+                    </div>
+                    <div class="mb-4">
+                        <h5>适用门店</h5>
+                        <p id="package-shop"></p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card purchase-card">
+                        <div class="card-body">
+                            <h5 class="card-title">购买套餐</h5>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span>价格:</span>
+                                <span class="text-danger fw-bold" id="card-price">¥0.00</span>
+                            </div>
+                            <button id="buy-button" class="btn btn-primary w-100">立即购买</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="error-container" class="alert alert-danger" style="display: none;">
+            无法加载套餐信息，请稍后重试
+        </div>
+
+        <div class="d-flex justify-content-center mt-4 gap-3">
+            <a id="back-to-shop" href="#" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i> 返回商家页面
+            </a>
+            <a href="search.html" class="btn btn-outline-primary">
+                <i class="bi bi-search me-1"></i> 返回搜索页面
+            </a>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="./js/package_detail.js"></script>
+</body>
+
+</html>

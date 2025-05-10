@@ -1,0 +1,175 @@
+/* 套餐详情页 CSS */
+
+
+/* 导入基础样式 */
+
+@import '../base.css';
+@import '../components.css';
+
+/* 主容器样式 */
+
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+
+/* 卡片样式 */
+
+.card-style {
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.card-style:hover {
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+}
+
+
+/* 套餐标题样式 */
+
+#package-title {
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+
+/* 销量徽章样式 */
+
+#package-sales {
+    display: inline-block;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+
+/* 套餐价格样式 */
+
+#package-price {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #ff4d4f;
+}
+
+
+/* 套餐内容列表样式 */
+
+#package-contents {
+    margin-bottom: 2rem;
+}
+
+#package-contents .list-group-item {
+    border-left: 3px solid #1890ff;
+    margin-bottom: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+#package-contents .list-group-item:hover {
+    background-color: #f0f9ff;
+    transform: translateX(5px);
+}
+
+
+/* 购买卡片样式 */
+
+.purchase-card {
+    position: sticky;
+    top: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e8e8e8;
+    transition: all 0.3s ease;
+}
+
+.purchase-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+}
+
+.purchase-card .card-body {
+    padding: 1.5rem;
+}
+
+.purchase-card .card-title {
+    color: #333;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+
+/* 价格标签样式 */
+
+#card-price {
+    font-size: 1.5rem;
+}
+
+
+/* 购买按钮样式 */
+
+#buy-button {
+    background-color: #1890ff;
+    border: none;
+    font-weight: 600;
+    padding: 0.8rem 1.5rem;
+    margin-top: 1rem;
+    transition: all 0.3s ease;
+}
+
+#buy-button:hover {
+    background-color: #096dd9;
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(24, 144, 255, 0.4);
+}
+
+
+/* 加载指示器样式 */
+
+#package-loading {
+    padding: 3rem 0;
+}
+
+
+/* 错误提示样式 */
+
+#error-container {
+    border-radius: 8px;
+    text-align: center;
+    padding: 1rem;
+}
+
+
+/* 响应式样式 */
+
+@media (max-width: 768px) {
+    .purchase-card {
+        position: static;
+        margin-top: 2rem;
+    }
+    #package-title {
+        font-size: 1.5rem;
+    }
+    #package-price {
+        font-size: 1.5rem;
+    }
+}
+
+
+/* 返回按钮样式 */
+
+.btn-outline-secondary,
+.btn-outline-primary {
+    font-weight: 500;
+    padding: 0.5rem 1.2rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-secondary:hover,
+.btn-outline-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
