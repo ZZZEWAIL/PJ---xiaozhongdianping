@@ -17,8 +17,7 @@
             <a class="navbar-brand d-flex align-items-center" href="#">
                 <i class="bi bi-shop me-2"></i> 小众点评
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu"
-                aria-controls="navMenu" aria-expanded="false" aria-label="Toggle navigation">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu" aria-controls="navMenu" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div id="navMenu" class="collapse navbar-collapse">
@@ -43,19 +42,31 @@
         <div id="shop-detail" class="card-style p-4 mb-4">
             <!-- 商家信息将动态填充 -->
         </div>
+
+        <!-- 团购套餐列表区域 -->
+        <div id="shop-packages" class="mb-4">
+            <h3 class="mb-3">团购套餐</h3>
+            <div id="packages-container" class="row row-cols-1 row-cols-md-2 g-4">
+                <!-- 套餐列表将动态填充 -->
+                <div class="col d-flex justify-content-center loading-container">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">加载中...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div id="shop-images">
             <h3 class="mb-3">店铺图片</h3>
             <div id="image-container" class="carousel slide" data-bs-ride="carousel">
                 <div class="carousel-inner">
                     <!-- 图片将动态填充 -->
                 </div>
-                <button class="carousel-control-prev" type="button" data-bs-target="#image-container"
-                    data-bs-slide="prev">
+                <button class="carousel-control-prev" type="button" data-bs-target="#image-container" data-bs-slide="prev">
                     <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                     <span class="visually-hidden">Previous</span>
                 </button>
-                <button class="carousel-control-next" type="button" data-bs-target="#image-container"
-                    data-bs-slide="next">
+                <button class="carousel-control-next" type="button" data-bs-target="#image-container" data-bs-slide="next">
                     <span class="carousel-control-next-icon" aria-hidden="true"></span>
                     <span class="visually-hidden">Next</span>
                 </button>

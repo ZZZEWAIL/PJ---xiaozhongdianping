@@ -1,4 +1,5 @@
 /* 全局样式 */
+
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: linear-gradient(to bottom, #f0f2f5 0%, #ffffff 100%);
@@ -6,7 +7,9 @@ body {
     padding: 0;
 }
 
+
 /* 导航栏 */
+
 .navbar-brand i {
     font-size: 1.5rem;
     color: #fff;
@@ -18,14 +21,18 @@ body {
     padding: 0.5rem 1rem;
 }
 
+
 /* 容器样式 */
+
 .container {
     max-width: 800px;
     margin: 0 auto;
     padding: 20px;
 }
 
+
 /* 卡片样式（与搜索页面一致） */
+
 .card-style {
     background: #fff;
     border-radius: 12px;
@@ -38,7 +45,9 @@ body {
     transform: translateY(-2px);
 }
 
+
 /* 标题样式 */
+
 h2,
 h3 {
     color: #333;
@@ -53,7 +62,9 @@ h3 {
     font-size: 1.5rem;
 }
 
+
 /* 商家信息 */
+
 #shop-detail {
     margin-bottom: 20px;
 }
@@ -65,12 +76,80 @@ h3 {
     line-height: 1.6;
 }
 
+
+/* 团购套餐区域 */
+
+#shop-packages {
+    margin: 30px 0;
+}
+
+.package-card {
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.package-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.package-card .card-title {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 12px;
+    font-size: 1.25rem;
+}
+
+.package-card .price {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #e74c3c;
+}
+
+.package-card .sales-badge {
+    background-color: #fcf8e3;
+    color: #c09853;
+    padding: 4px 8px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.package-card .content-preview {
+    color: #666;
+    font-size: 0.95rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin-bottom: 5px;
+}
+
+.view-detail-btn {
+    border-radius: 20px;
+    font-size: 0.9rem;
+    padding: 5px 15px;
+}
+
+.loading-container {
+    min-height: 150px;
+    align-items: center;
+}
+
+
 /* 店铺图片区域 */
+
 #shop-images {
     margin-top: 20px;
 }
 
+
 /* 轮播图样式 */
+
 .carousel {
     max-width: 100%;
     margin-bottom: 1rem;
@@ -100,7 +179,9 @@ h3 {
     background: rgba(0, 0, 0, 0.5);
 }
 
+
 /* 分页导航 */
+
 .pagination {
     text-align: center;
     margin-top: 1rem;
@@ -129,7 +210,9 @@ h3 {
     margin: 0 1rem;
 }
 
+
 /* 返回链接 */
+
 .btn-outline-primary {
     font-size: 1rem;
     padding: 0.5rem 1.5rem;
