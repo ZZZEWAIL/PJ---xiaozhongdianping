@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>确认订单</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
+    <link rel="stylesheet" href="./css/pages/order_confirm.css">
+</head>
+
+<body>
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="#">
+                <i class="bi bi-shop me-2"></i> 小众点评
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu" aria-controls="navMenu" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div id="navMenu" class="collapse navbar-collapse">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="search.html">首页</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">附近商家</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">关于我们</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <div class="container mt-4">
+        <h2 class="mb-4 text-center">确认订单</h2>
+
+        <!-- 订单信息卡片 -->
+        <div class="card order-card mb-4">
+            <div class="card-header">
+                <h3 class="card-title mb-0">订单信息</h3>
+            </div>
+            <div class="card-body">
+                <div id="package-info" class="mb-4">
+                    <!-- 套餐信息将动态填充 -->
+                    <div class="d-flex justify-content-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">加载中...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="divider"></div>
+
+                <!-- 优惠券选择 -->
+                <div class="coupon-section mb-4">
+                    <h4 class="section-title">优惠券</h4>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" id="use-coupon">
+                        <label class="form-check-label" for="use-coupon">
+                            使用优惠券
+                        </label>
+                    </div>
+                    <select class="form-select" id="coupon-select" disabled>
+                        <option value="">选择优惠券</option>
+                        <!-- 优惠券选项将动态填充 -->
+                    </select>
+                    <div id="coupon-restrictions" class="mt-2 small text-muted">
+                        <!-- 优惠券使用限制将动态填充 -->
+                    </div>
+                </div>
+
+                <div class="divider"></div>
+
+                <!-- 订单金额 -->
+                <div class="order-amount">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>套餐原价</span>
+                        <span id="original-price">¥0.00</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>优惠金额</span>
+                        <span id="discount-amount">-¥0.00</span>
+                    </div>
+                    <div class="d-flex justify-content-between total-amount">
+                        <span>实付金额</span>
+                        <span id="final-price" class="highlight">¥0.00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 确认按钮 -->
+        <div class="action-buttons">
+            <button id="cancel-btn" class="btn btn-outline-secondary me-2">
+                <i class="bi bi-x-circle me-1"></i> 取消
+            </button>
+            <button id="confirm-btn" class="btn btn-primary">
+                <i class="bi bi-check-circle me-1"></i> 确认支付
+            </button>
+        </div>
+    </div>
+
+    <!-- 支付成功模态框 -->
+    <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="successModalLabel">支付成功</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <!-- 订单成功信息将动态填充 -->
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn btn-primary" id="view-order-btn">查看订单</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="./js/order_confirm.js"></script>
+</body>
+
+</html>
