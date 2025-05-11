@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的订单 - 小众点评</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
+    <link rel="stylesheet" href="./css/pages/my_orders.css">
+</head>
+
+<body>
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="#">
+                <i class="bi bi-shop me-2"></i> 小众点评
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu" aria-controls="navMenu" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div id="navMenu" class="collapse navbar-collapse">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="search.html">首页</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">附近商家</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="my_orders.html">我的订单</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <div class="container mt-4">
+        <h2 class="mb-4 text-center">我的订单</h2>
+
+        <!-- 加载中提示 -->
+        <div id="orders-loading" class="text-center my-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">加载中...</span>
+            </div>
+            <p class="mt-2">正在加载订单数据...</p>
+        </div>
+
+        <!-- 订单列表容器 -->
+        <div id="orders-container" style="display: none;">
+            <div class="card">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>套餐名称</th>
+                                    <th>使用门店</th>
+                                    <th>下单时间</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="orders-list">
+                                <!-- 订单数据将动态插入这里 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 分页控件 -->
+            <div class="d-flex justify-content-between align-items-center mt-4">
+                <span id="page-info" class="text-muted">第 1 页，共 1 页</span>
+                <div class="pagination-controls">
+                    <button id="prev-page" class="btn btn-outline-primary me-2" disabled>
+                        <i class="bi bi-chevron-left"></i> 上一页
+                    </button>
+                    <button id="next-page" class="btn btn-outline-primary" disabled>
+                        下一页 <i class="bi bi-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 无订单提示 -->
+        <div id="no-orders" class="text-center py-5 card" style="display: none;">
+            <div class="card-body">
+                <i class="bi bi-cart-x fs-1 text-muted mb-3"></i>
+                <h4>暂无订单</h4>
+                <p class="text-muted">您还没有购买过套餐，去看看有什么好玩的吧！</p>
+                <a href="search.html" class="btn btn-primary mt-3">
+                    <i class="bi bi-search me-1"></i> 去探索
+                </a>
+            </div>
+        </div>
+
+        <!-- 错误提示 -->
+        <div id="error-container" class="alert alert-danger text-center" style="display: none;">
+            无法加载订单信息，请稍后重试
+        </div>
+
+        <!-- 未登录提示 -->
+        <div id="login-required" class="text-center py-5 card" style="display: none;">
+            <div class="card-body">
+                <i class="bi bi-person-lock fs-1 text-muted mb-3"></i>
+                <h4>请先登录</h4>
+                <p class="text-muted">登录后才能查看您的订单信息</p>
+                <a href="login.html" class="btn btn-primary mt-3">
+                    <i class="bi bi-box-arrow-in-right me-1"></i> 去登录
+                </a>
+            </div>
+        </div>
+
+        <!-- 底部导航 -->
+        <div class="d-flex justify-content-center mt-4">
+            <a href="search.html" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i> 返回搜索页面
+            </a>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="./js/my_orders.js"></script>
+</body>
+
+</html>
