@@ -299,7 +299,8 @@ async def get_user_orders(
         OrderSchema(
             package_title=order[1],
             created_at=order[0].created_at,
-            shop_name=order[2]
+            shop_name=order[2],
+            order_id=order[0].id
         )
         for order in orders
     ]
@@ -337,5 +338,6 @@ async def get_order_detail(
         package_title=order[1],
         created_at=order[0].created_at,
         shop_name=order[2],
+        order_id=order[0].id,
         voucher_code=order[0].voucher_code
     )

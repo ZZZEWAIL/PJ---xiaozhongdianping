@@ -121,7 +121,7 @@ function displayOrders(data) {
             <td>${order.shop_name}</td>
             <td>${formattedDate}</td>
             <td>
-                <a href="voucher.html?order_id=${order.id}" class="btn btn-sm btn-outline-primary">
+                <a href="voucher.html?order_id=${order.order_id}" class="btn btn-sm btn-outline-primary">
                     查看券码
                 </a>
             </td>
@@ -135,7 +135,7 @@ function displayOrders(data) {
             }
 
             // 如果点击表格其他部分，也跳转到券码页面
-            window.location.href = `voucher.html?order_id=${order.id}`;
+            window.location.href = `voucher.html?order_id=${order.order_id}`;
         });
 
         // 添加到订单列表

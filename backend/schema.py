@@ -46,6 +46,7 @@ class Order(BaseModel):
     package_title: str
     created_at: datetime
     shop_name: str
+    order_id: int # 订单 ID
     voucher_code: str | None = None  # 仅在详情页返回
 
     class Config:
