@@ -17,14 +17,19 @@ async def paginate_query(
     db: AsyncSession,
     query,
     page: int,
-    page_size: int
+    page_size: int,
+    return_scalars: bool = True
 ) -> Dict[str, Any]:
     count_query = query.with_only_columns(func.count()).order_by(None)
     total = await db.scalar(count_query)
 
     query = query.offset((page - 1) * page_size).limit(page_size)
     result = await db.execute(query)
-    items = result.scalars().all()
+    
+    if return_scalars:
+        items = result.scalars().all()
+    else:
+        items = result.all()
 
     return {
         "total": total,
@@ -287,7 +292,7 @@ async def get_user_orders(
         .order_by(Order.created_at.desc())
     )
 
-    result = await paginate_query(db, query, page, page_size)
+    result = await paginate_query(db, query, page, page_size, return_scalars=False)
     orders = result["data"]
 
     order_data = [
