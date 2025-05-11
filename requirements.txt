@@ -52,3 +52,4 @@ tzlocal==5.2
 urllib3==2.3.0
 utils==1.0.2
 uvicorn==0.34.0
+pypinyin==0.48.0

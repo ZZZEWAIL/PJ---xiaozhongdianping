@@ -6,10 +6,11 @@ from backend.register import router as register_router
 from backend.login import router as login_router
 from backend.shops import router as shops_router
 from backend.filter_sort import router as filter_sort_router
+from backend.orders import router as orders_router
+from backend.coupons import router as coupons_router
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
-
 
 app = FastAPI(docs_url="/docs", redoc_url="/redoc")
 
@@ -25,6 +26,8 @@ app.include_router(register_router, prefix="/auth", tags=["auth"])
 app.include_router(login_router, prefix="/auth", tags=["auth"])
 app.include_router(shops_router, prefix="/api", tags=["shops"])
 app.include_router(filter_sort_router, prefix="/api", tags=["filter_sort"])
+app.include_router(orders_router,   prefix="/api",  tags=["orders"])
+app.include_router(coupons_router,  prefix="/api",  tags=["coupons"])
 
 
 @app.on_event("startup")
@@ -34,6 +37,15 @@ async def startup():
     print("Starting database initialization...")
     await init_db()
     print("Database initialization completed.")
+
+    # 通过观察者模式注册监听
+    from backend.order_observers import (
+        register_observer,
+        PackageSalesObserver,
+        CouponUsageObserver
+    )
+    register_observer(PackageSalesObserver())  # 订单创建后更新销量
+    register_observer(CouponUsageObserver())   # 订单创建后更新券状态
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request, exc):
