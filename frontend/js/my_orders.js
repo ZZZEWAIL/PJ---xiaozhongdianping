@@ -92,7 +92,7 @@ function displayOrders(data) {
     const noOrdersContainer = document.getElementById('no-orders');
 
     // 检查是否有订单
-    if (!data.orders || data.orders.length === 0) {
+    if (!data.data || data.data.length === 0) {
         ordersContainer.style.display = 'none';
         noOrdersContainer.style.display = 'block';
         return;
@@ -106,7 +106,7 @@ function displayOrders(data) {
     ordersList.innerHTML = '';
 
     // 添加订单行
-    data.orders.forEach(order => {
+    data.data.forEach(order => {
         // 格式化日期
         const orderDate = new Date(order.created_at);
         const formattedDate = formatDate(orderDate);
