@@ -74,12 +74,41 @@ async function fetchAvailableCoupons() {
 function displayPackageInfo(packageData) {
     const packageInfoContainer = document.getElementById('package-info');
 
+    // 解析套餐内容
+    const contentsList = parsePackageContents(packageData.contents);
+
     packageInfoContainer.innerHTML = `
-        <h4 class="package-title">${packageData.title}</h4>
-        <p class="package-shop">${packageData.shop_name || '商家信息加载中...'}</p>
-        <p class="package-contents">${packageData.contents}</p>
-        <p class="package-sales">已售${packageData.sales}份</p>
+        <div class="package-header">
+            <h4 class="package-title">${packageData.title}</h4>
+            <div class="package-price">¥${packageData.price.toFixed(2)}</div>
+        </div>
+        ${packageData.description ? `<p class="package-description">${packageData.description}</p>` : ''}
+        <div class="package-contents">
+            <h5 class="contents-title">套餐内容</h5>
+            <ul class="contents-list">
+                ${contentsList.map(item => `<li>${item}</li>`).join('')}
+            </ul>
+        </div>
+        <div class="package-footer">
+            <span class="package-sales">已售${packageData.sales}份</span>
+        </div>
     `;
+}
+
+/**
+ * 解析套餐内容字符串
+ * @param {string} contents 套餐内容字符串，格式如 "汉堡*2+可乐*2"
+ * @returns {string[]} 解析后的内容列表
+ */
+function parsePackageContents(contents) {
+    if (!contents) return [];
+
+    // 按+号分割不同项目
+    return contents.split('+').map(item => {
+        // 处理每个项目，格式如 "汉堡*2"
+        const [name, quantity] = item.split('*');
+        return quantity ? `${name.trim()} × ${quantity.trim()}` : name.trim();
+    });
 }
 
 /**
@@ -100,7 +129,7 @@ function populateCouponSelect() {
     availableCoupons.forEach(couponInfo => {
         const coupon = couponInfo.coupon;
         const option = document.createElement('option');
-        option.value = couponInfo.id; // 使用 UserCoupon 的 ID
+        option.value = couponInfo.id;  // 使用 UserCoupon 的 ID
         option.textContent = `${coupon.name} (${formatCouponValue(coupon)})`;
         option.dataset.coupon = JSON.stringify(couponInfo);
         couponSelect.appendChild(option);
