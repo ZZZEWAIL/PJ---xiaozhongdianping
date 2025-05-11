@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>券码详情 - 小众点评</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
+    <link href="css/voucher.css" rel="stylesheet">
+</head>
+
+<body>
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="#">
+                <i class="bi bi-shop me-2"></i> 小众点评
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu" aria-controls="navMenu" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div id="navMenu" class="collapse navbar-collapse">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="search.html">首页</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">附近商家</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="my_orders.html">我的订单</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <div class="container mt-4">
+        <h2 class="mb-4 text-center">券码详情</h2>
+
+        <!-- 加载状态 -->
+        <div id="voucher-loading" class="text-center my-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">加载中...</span>
+            </div>
+            <p class="mt-2">正在加载券码信息...</p>
+        </div>
+
+        <!-- 错误提示 -->
+        <div id="error-container" class="alert alert-danger" style="display: none;"></div>
+
+        <!-- 登录提示 -->
+        <div id="login-required" class="text-center py-5 card" style="display: none;">
+            <div class="card-body">
+                <i class="bi bi-person-lock fs-1 text-muted mb-3"></i>
+                <h4>请先登录</h4>
+                <p class="text-muted">登录后才能查看券码信息</p>
+                <a href="login.html?redirect=my_orders.html" class="btn btn-primary mt-3">
+                    <i class="bi bi-box-arrow-in-right me-1"></i> 去登录
+                </a>
+            </div>
+        </div>
+
+        <!-- 券码信息 -->
+        <div id="voucher-container" class="card-style p-4 mb-4" style="display: none;">
+            <div class="row">
+                <div class="col-md-8">
+                    <h3 id="package-title" class="mb-3"></h3>
+
+                    <div class="voucher-info mb-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-muted">下单时间:</span>
+                            <span id="order-time" class="fw-bold"></span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-muted">适用门店:</span>
+                            <span id="shop-name" class="fw-bold"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h5>使用须知</h5>
+                        <ul class="usage-notes">
+                            <li>请到店出示券码，工作人员扫码或核对券码后即可使用</li>
+                            <li>本券一经使用，不可退款</li>
+                            <li>如有问题，请联系门店工作人员</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="voucher-card">
+                        <div class="voucher-header">
+                            <i class="bi bi-ticket-perforated"></i> 券码
+                        </div>
+                        <div class="voucher-body">
+                            <div class="voucher-code" id="voucher-code">
+                                <!-- 券码将动态填充 -->
+                            </div>
+                            <button id="copy-code" class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-clipboard me-1"></i> 复制券码
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 底部导航 -->
+        <div class="d-flex justify-content-center mt-4 gap-3">
+            <a href="my_orders.html" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i> 返回订单列表
+            </a>
+        </div>
+    </div>
+
+    <!-- 复制成功提示 -->
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+        <div id="copy-toast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <i class="bi bi-check-circle-fill text-success me-2"></i>
+                <strong class="me-auto">成功</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body">
+                券码已复制到剪贴板！
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/voucher.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,228 @@
+/* 券码详情页 CSS */
+
+
+/* 导入基础样式 */
+
+@import '../base.css';
+@import '../components.css';
+
+/* 主容器样式 */
+
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+
+/* 卡片样式 */
+
+.card-style {
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.card-style:hover {
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+}
+
+
+/* 套餐标题样式 */
+
+#package-title {
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 1rem;
+}
+
+
+/* 套餐内容列表样式 */
+
+#package-contents {
+    margin-bottom: 2rem;
+}
+
+#package-contents .list-group-item {
+    border-left: 3px solid #1890ff;
+    margin-bottom: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+#package-contents .list-group-item:hover {
+    background-color: #f0f9ff;
+    transform: translateX(5px);
+}
+
+
+/* 券码卡片样式 */
+
+.voucher-card {
+    position: sticky;
+    top: 20px;
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+    border: 2px dashed #ff9800;
+    transition: all 0.3s ease;
+}
+
+.voucher-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+.voucher-header {
+    background-color: #ff9800;
+    color: white;
+    padding: 1rem;
+    text-align: center;
+    font-weight: 600;
+    font-size: 1.2rem;
+}
+
+.voucher-header i {
+    margin-right: 0.5rem;
+}
+
+.voucher-body {
+    padding: 2rem 1.5rem;
+    text-align: center;
+}
+
+.voucher-code {
+    font-family: 'Courier New', monospace;
+    font-size: 1.8rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: #333;
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 6px;
+    margin-bottom: 1.5rem;
+    word-break: break-all;
+    border: 1px solid #e9ecef;
+}
+
+.voucher-footer {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    text-align: center;
+    border-top: 1px solid #e9ecef;
+}
+
+
+/* 订单信息样式 */
+
+.voucher-info {
+    background-color: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+}
+
+.voucher-info div {
+    margin-bottom: 0.8rem;
+}
+
+.voucher-info div:last-child {
+    margin-bottom: 0;
+}
+
+
+/* 使用须知样式 */
+
+.usage-notes {
+    padding-left: 1.5rem;
+}
+
+.usage-notes li {
+    margin-bottom: 0.5rem;
+    color: #666;
+}
+
+
+/* 按钮样式 */
+
+#copy-code {
+    transition: all 0.3s ease;
+}
+
+#copy-code:hover {
+    background-color: #f1f1f1;
+    transform: translateY(-2px);
+}
+
+.btn-outline-primary,
+.btn-outline-secondary {
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-primary:hover,
+.btn-outline-secondary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+
+/* 加载和错误状态样式 */
+
+#voucher-loading {
+    padding: 3rem 0;
+}
+
+#error-container {
+    border-radius: 8px;
+    text-align: center;
+    padding: 1rem;
+}
+
+
+/* 未登录卡片样式 */
+
+#login-required {
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+#login-required .card-body {
+    padding: 3rem 1.5rem;
+}
+
+#login-required i {
+    display: block;
+    margin-bottom: 1.5rem;
+    font-size: 3rem;
+    color: #6c757d;
+}
+
+
+/* Toast 提示样式 */
+
+.toast {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+
+/* 响应式样式 */
+
+@media (max-width: 768px) {
+    .voucher-card {
+        position: static;
+        margin-top: 2rem;
+        margin-bottom: 2rem;
+    }
+    .voucher-code {
+        font-size: 1.3rem;
+        letter-spacing: 1px;
+    }
+    #package-title {
+        font-size: 1.5rem;
+    }
+}
