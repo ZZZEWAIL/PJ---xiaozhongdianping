@@ -20,6 +20,16 @@ const VOUCHER_CODE_CONFIG = {
     ellipsis: '...' // 省略号
 };
 
+// QR码配置
+const QR_CODE_CONFIG = {
+    width: 160,
+    height: 160,
+    colorDark: "#000000",
+    colorLight: "#ffffff",
+    correctLevel: 2, // QRCode.CorrectLevel.M，中等错误校正级别
+    margin: 2
+};
+
 /**
  * 页面初始化
  */
@@ -101,6 +111,41 @@ function displayOrderDetail(data) {
     document.getElementById('voucher-code').textContent = formattedCode;
     // 存储完整券码用于复制
     document.getElementById('voucher-code').dataset.fullCode = data.voucher_code;
+
+    // 生成二维码
+    generateQRCode(data.voucher_code);
+}
+
+/**
+ * 生成二维码
+ * @param {string} code - 要编码的券码
+ */
+function generateQRCode(code) {
+    if (!code) return;
+
+    // 清空已有的 QR 码（如果存在）
+    const qrcodeElement = document.getElementById('qrcode');
+    qrcodeElement.innerHTML = '';
+
+    try {
+        // 创建 QR 码
+        new QRCode(qrcodeElement, {
+            text: code,
+            width: QR_CODE_CONFIG.width,
+            height: QR_CODE_CONFIG.height,
+            colorDark: QR_CODE_CONFIG.colorDark,
+            colorLight: QR_CODE_CONFIG.colorLight,
+            correctLevel: QR_CODE_CONFIG.correctLevel,
+            margin: QR_CODE_CONFIG.margin
+        });
+    } catch (error) {
+        console.error('生成 QR 码失败:', error);
+        // 在生成 QR 码失败时优雅地处理错误
+        qrcodeElement.innerHTML = `<div class="text-center text-danger">
+            <i class="bi bi-exclamation-triangle"></i>
+            <p class="small mt-1">QR码生成失败</p>
+        </div>`;
+    }
 }
 
 /**
