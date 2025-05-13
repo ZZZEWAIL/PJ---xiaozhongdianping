@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from datetime import datetime
 from typing import Dict, Any
+from backend.coupon_validators import run_coupon_validators
 from backend.database import get_db
 from backend.models import Package, Order, Coupon, UserCoupon, CouponStatus, Shop
 from backend.schema import OrderCreate, OrderCreated
@@ -42,24 +43,13 @@ async def create_order(order_data: OrderCreate,
 
         user_coupon, coupon = data
 
-        # 校验：最低消费门槛
-        if coupon.min_spend and package.price < coupon.min_spend:
-            raise HTTPException(status_code=400, detail="不满足使用该券的最低消费金额")
-
-        # 校验：有效期（若过期，标记并拒绝使用）
-        if user_coupon.expires_at and datetime.utcnow() > user_coupon.expires_at:
-            user_coupon.status = CouponStatus.expired
-            await db.commit()
-            raise HTTPException(status_code=400, detail="该优惠券已过期")
-
-        # 校验：门店/品类限制
+        # 获取套餐所属店铺信息（用于校验店铺/品类限制）
         shop = await db.get(Shop, package.shop_id)
-        if coupon.shop_restriction and shop and shop.name != coupon.shop_restriction:
-            raise HTTPException(status_code=400, detail="该优惠券不适用于此门店")
-        if coupon.category and shop and shop.category != coupon.category:
-            raise HTTPException(status_code=400, detail="该优惠券不适用于此品类")
+        
+        # 使用 Validator 模式依次执行所有优惠券校验
+        run_coupon_validators(coupon, user_coupon, package, shop)
 
-        # 使用策略模式，应用对应的折扣逻辑
+        # 校验通过后，应用优惠券的折扣逻辑（策略模式）
         from backend.coupon_strategies import get_coupon_strategy
         strategy = get_coupon_strategy(coupon.discount_type)
         final_price = strategy.apply_discount(package.price, coupon)

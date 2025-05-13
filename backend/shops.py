@@ -257,7 +257,7 @@ async def get_shop_packages(
     packages = result.scalars().all()
 
     if not packages:
-        return []
+        return HTTPException(status_code=404, detail="Package not found")
 
     return packages
 
