@@ -1,0 +1,213 @@
+/* 我的卡包页面样式 */
+
+body {
+    background-color: #f8f9fa;
+    font-family: 'Roboto', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.container {
+    max-width: 1000px;
+}
+
+
+/* 标签页样式 */
+
+.nav-tabs .nav-link {
+    border: none;
+    color: #6c757d;
+    font-weight: 500;
+    padding: 10px 20px;
+}
+
+.nav-tabs .nav-link.active {
+    color: #007bff;
+    border-bottom: 2px solid #007bff;
+    background-color: transparent;
+}
+
+.nav-tabs .nav-link:hover:not(.active) {
+    border-bottom: 2px solid #e9ecef;
+}
+
+.tab-content {
+    padding-top: 1rem;
+}
+
+
+/* 优惠券卡片样式 */
+
+.coupon-card {
+    border-radius: 10px;
+    margin-bottom: 20px;
+    overflow: hidden;
+    position: relative;
+    border: none;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.coupon-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.coupon-card.used {
+    opacity: 0.75;
+    background-color: #f8f9fa;
+}
+
+.coupon-card.expired {
+    opacity: 0.75;
+    background-color: #f8f9fa;
+}
+
+
+/* 优惠券金额部分 */
+
+.coupon-value {
+    padding: 15px;
+    background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+    color: white;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
+.used .coupon-value {
+    background: linear-gradient(135deg, #6c757d, #adb5bd);
+}
+
+.expired .coupon-value {
+    background: linear-gradient(135deg, #6c757d, #adb5bd);
+}
+
+.coupon-value h3 {
+    margin-bottom: 5px;
+    font-weight: 700;
+    font-size: 22px;
+}
+
+.coupon-value p {
+    margin-bottom: 0;
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+
+/* 优惠券信息部分 */
+
+.coupon-info {
+    padding: 15px;
+    background-color: white;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
+
+.coupon-title {
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: #212529;
+    font-size: 16px;
+}
+
+.coupon-restriction {
+    font-size: 13px;
+    color: #6c757d;
+    margin-bottom: 5px;
+}
+
+.coupon-restriction i {
+    margin-right: 5px;
+    font-size: 12px;
+}
+
+.coupon-expiry {
+    font-size: 13px;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed #e9ecef;
+}
+
+.coupon-expiry .expiry-text {
+    color: #6c757d;
+}
+
+.coupon-expiry .expiry-date {
+    color: #dc3545;
+    font-weight: 500;
+}
+
+.coupon-expiry .days-left {
+    background-color: #dc3545;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 12px;
+    margin-left: 5px;
+}
+
+
+/* 折扣类型标签 */
+
+.discount-type {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
+
+/* 响应式布局调整 */
+
+@media (max-width: 767px) {
+    .nav-tabs .nav-link {
+        padding: 10px 15px;
+        font-size: 14px;
+    }
+    .coupon-value h3 {
+        font-size: 20px;
+    }
+}
+
+
+/* 空状态提示样式 */
+
+.coupon-container .text-muted {
+    color: #adb5bd !important;
+}
+
+
+/* 状态标签 */
+
+.status-badge {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    height: 60px;
+    width: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #dee2e6;
+    border-radius: 50%;
+    font-size: 14px;
+    font-weight: 700;
+    color: #6c757d;
+    background-color: white;
+    opacity: 0.9;
+    transform: rotate(15deg);
+}
+
+.used .status-badge {
+    border-color: #28a745;
+    color: #28a745;
+}
+
+.expired .status-badge {
+    border-color: #dc3545;
+    color: #dc3545;
+}

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的卡包 - 小众点评</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
+    <link rel="stylesheet" href="./css/pages/my_coupons.css">
+</head>
+
+<body>
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="#">
+                <i class="bi bi-shop me-2"></i> 小众点评
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu" aria-controls="navMenu" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div id="navMenu" class="collapse navbar-collapse">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="search.html">首页</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">附近商家</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="my_orders.html">我的订单</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="my_coupons.html">我的卡包</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <div class="container mt-4 mb-5">
+        <h2 class="text-center mb-4">我的卡包</h2>
+
+        <!-- 优惠券分类标签页 -->
+        <ul class="nav nav-tabs mb-4" id="coupon-tabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="unused-tab" data-bs-toggle="tab" data-bs-target="#unused" type="button" role="tab" aria-controls="unused" aria-selected="true">
+                    未使用
+                    <span class="badge bg-primary ms-1" id="unused-count">0</span>
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="used-tab" data-bs-toggle="tab" data-bs-target="#used" type="button" role="tab" aria-controls="used" aria-selected="false">
+                    已使用
+                    <span class="badge bg-secondary ms-1" id="used-count">0</span>
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="expired-tab" data-bs-toggle="tab" data-bs-target="#expired" type="button" role="tab" aria-controls="expired" aria-selected="false">
+                    已过期
+                    <span class="badge bg-secondary ms-1" id="expired-count">0</span>
+                </button>
+            </li>
+        </ul>
+
+        <!-- 优惠券列表内容 -->
+        <div class="tab-content" id="coupon-tab-content">
+            <!-- 未使用优惠券 -->
+            <div class="tab-pane fade show active" id="unused" role="tabpanel" aria-labelledby="unused-tab">
+                <div id="unused-container" class="coupon-container">
+                    <div class="text-center py-5" id="unused-loading">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">加载中...</span>
+                        </div>
+                    </div>
+                    <div id="unused-empty" class="text-center py-5 d-none">
+                        <i class="bi bi-ticket-perforated-fill text-muted display-1"></i>
+                        <p class="text-muted mt-3">暂无可用优惠券</p>
+                        <button class="btn btn-outline-primary mt-2" id="get-coupons-btn">
+                            <i class="bi bi-plus-circle me-1"></i> 去领券
+                        </button>
+                    </div>
+                    <div id="unused-list" class="row g-3">
+                        <!-- 动态加载优惠券 -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- 已使用优惠券 -->
+            <div class="tab-pane fade" id="used" role="tabpanel" aria-labelledby="used-tab">
+                <div id="used-container" class="coupon-container">
+                    <div class="text-center py-5" id="used-loading">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">加载中...</span>
+                        </div>
+                    </div>
+                    <div id="used-empty" class="text-center py-5 d-none">
+                        <i class="bi bi-ticket-perforated-fill text-muted display-1"></i>
+                        <p class="text-muted mt-3">暂无已使用优惠券</p>
+                    </div>
+                    <div id="used-list" class="row g-3">
+                        <!-- 动态加载优惠券 -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- 已过期优惠券 -->
+            <div class="tab-pane fade" id="expired" role="tabpanel" aria-labelledby="expired-tab">
+                <div id="expired-container" class="coupon-container">
+                    <div class="text-center py-5" id="expired-loading">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">加载中...</span>
+                        </div>
+                    </div>
+                    <div id="expired-empty" class="text-center py-5 d-none">
+                        <i class="bi bi-ticket-perforated-fill text-muted display-1"></i>
+                        <p class="text-muted mt-3">暂无已过期优惠券</p>
+                    </div>
+                    <div id="expired-list" class="row g-3">
+                        <!-- 动态加载优惠券 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="./js/my_coupons.js"></script>
+</body>
+
+</html>
