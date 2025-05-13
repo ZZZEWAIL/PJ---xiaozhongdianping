@@ -2,74 +2,153 @@
 <html lang="zh-CN">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>首页</title>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Piedra&family=Dancing+Script&display=swap"
-    rel="stylesheet">
-  <link rel="stylesheet" href="./css/style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>首页 · 小众点评</title>
+
+  <!-- Bootstrap CSS + Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Piedra&family=Dancing+Script&display=swap" rel="stylesheet" />
+
+  <!-- Your CSS -->
+  <link rel="stylesheet" href="./css/style.css" />
   <link rel="stylesheet" href="./css/base.css" />
   <link rel="stylesheet" href="./css/components.css" />
   <link rel="stylesheet" href="./css/pages/home.css" />
 </head>
 
 <body>
+  <!-- NAVBAR -->
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container">
       <a class="navbar-brand" href="#">小众点评</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu"
-        aria-controls="navMenu" aria-expanded="false" aria-label="Toggle navigation">
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+              data-bs-target="#navMenu" aria-controls="navMenu"
+              aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
+
       <div id="navMenu" class="collapse navbar-collapse">
         <ul class="navbar-nav ms-auto">
-          <li class="nav-item">
-            <a class="nav-link active" href="index.html">首页</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="search.html">搜索</a> <!-- 添加跳转到搜索页面的链接 -->
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#">关于我们</a>
-          </li>
+          <li class="nav-item"><a class="nav-link active" href="index.html">首页</a></li>
+          <li class="nav-item"><a class="nav-link" href="search.html">搜索</a></li>
+          <li class="nav-item"><a class="nav-link" href="#">关于我们</a></li>
         </ul>
       </div>
     </div>
   </nav>
+
+  <!-- SIDEBAR -->
   <div class="vertical-nav" id="sidebar">
-    <div id="half">
-      <h1>导航</h1>
-    </div>
+    <div id="half"><h1>导航</h1></div>
     <ul>
-      <li><a href="#">菜单 1</a></li>
-      <li><a href="#">菜单 2</a></li>
-      <li><a href="#">菜单 3</a></li>
+      <li><a href="#">菜单 1</a></li>
+      <li><a href="#">菜单 2</a></li>
+      <li><a href="#">菜单 3</a></li>
     </ul>
   </div>
+
+  <!-- PAGE CONTENT -->
   <div class="page-content" id="content">
-    <div class="home-container">
-      <h1>欢迎，<span id="username"></span>！</h1>
-      <p>这是你的首页，登录时间：<span id="login-time"></span></p>
-      <button id="logout-btn">登出</button>
-      <div id="image">
-        <img src="https://via.placeholder.com/300" alt="示例图片">
+    <div class="container py-5 home-container">
+
+      <h1 class="mb-3">欢迎，<span id="username"></span>！</h1>
+      <p>登录时间：<span id="login-time"></span></p>
+
+      <!-- 领取新人券 -->
+      <button id="newUserCouponBtn" class="btn btn-warning btn-lg shadow-sm my-3">
+        <i class="bi bi-ticket-perforated me-2"></i> 领取新人券
+      </button>
+
+      <!-- 快捷导航 -->
+      <div class="row row-cols-1 row-cols-md-3 g-3 my-4">
+        <div class="col">
+          <a href="voucher.html" class="btn btn-outline-primary w-100 py-3">
+            <i class="bi bi-ticket-detailed me-2"></i> 查看券码
+          </a>
+        </div>
+        <div class="col">
+          <a href="package_detail.html" class="btn btn-outline-secondary w-100 py-3">
+            <i class="bi bi-box-seam me-2"></i> 套餐详情
+          </a>
+        </div>
+        <div class="col">
+          <a href="my_orders.html" class="btn btn-outline-success w-100 py-3">
+            <i class="bi bi-receipt-cutoff me-2"></i> 我的订单
+          </a>
+        </div>
       </div>
+
+      <button id="logout-btn" class="btn btn-outline-danger btn-sm">登出</button>
+
+      <!-- 示例图片与内容 -->
+      <div id="image" class="my-4">
+        <img src="https://via.placeholder.com/300" alt="示例图片" class="img-fluid rounded shadow-sm" />
+      </div>
+
       <p class="lead">这是一个示例内容区域，可以展示更多信息。</p>
-      <div class="card-list">
+
+      <!-- 近期活动 -->
+      <div class="card-list my-4">
         <h3>近期活动</h3>
-        <div class="card">
-          <h4>活动 1</h4>
+        <div class="card p-3 mb-3 shadow-sm">
+          <h4>活动 1</h4>
           <p>这是一个示例活动描述，展示用户参与的活动信息。</p>
         </div>
-        <div class="card">
-          <h4>活动 2</h4>
+        <div class="card p-3 shadow-sm">
+          <h4>活动 2</h4>
           <p>另一个示例活动，展示更多内容。</p>
         </div>
       </div>
     </div>
   </div>
-  <script src="./js/main.js"></script>
-</body>
 
+  <!-- Bootstrap JS (required for navbar toggler) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- 💡 Inline script to bypass backend auth while developing -->
+  <script>
+    const OFFLINE_MODE = true;   // set to false when backend is running
+
+    document.addEventListener('DOMContentLoaded', () => {
+
+      // 1️⃣  Display username / time
+      if (OFFLINE_MODE) {
+        document.getElementById('username').textContent = 'DemoUser';
+        document.getElementById('login-time').textContent = new Date().toLocaleString();
+      } else {
+        // 🔒  Real check (uncomment when backend is up)
+        /*
+        fetch('http://127.0.0.1:8000/auth/protected-endpoint', {
+          credentials: 'include'
+        }).then(res => {
+          if (!res.ok) location.href = 'login.html';
+          return res.json();
+        }).then(data => {
+          document.getElementById('username').textContent = data.username;
+          document.getElementById('login-time').textContent = new Date().toLocaleString();
+        }).catch(() => location.href = 'login.html');
+        */
+      }
+
+      // 2️⃣  New‑user coupon button
+      document.getElementById('newUserCouponBtn')
+        ?.addEventListener('click', () => location.href = 'voucher.html#new');
+
+      // 3️⃣  Sidebar toggle (click brand area)
+      document.querySelector('nav').addEventListener('click', e => {
+        if (e.target.tagName === 'A') return;
+        document.getElementById('sidebar')?.classList.toggle('active');
+        document.getElementById('content')?.classList.toggle('active');
+      });
+
+      // 4️⃣  Dummy logout (offline mode just reloads)
+      document.getElementById('logout-btn')
+        ?.addEventListener('click', () => location.href = 'login.html');
+    });
+  </script>
+</body>
 </html>
