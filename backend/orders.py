@@ -46,8 +46,8 @@ async def create_order(order_data: OrderCreate,
             raise HTTPException(status_code=400, detail="最低消费金额未满足")
     
 # 检查是否过期
-        if user_coupon.expires_at and date.time() >= user_coupon.expires_at:
-            user_coupon.status = CouponStatus.tus.expired
+        if user_coupon.expires_at and datetime.utcnow() > user_coupon.expires_at:
+            user_coupon.status = CouponStatus.expired
 
             await db.commit()
             raise HTTPException(status_code=400, detail="该优惠券已过期")
