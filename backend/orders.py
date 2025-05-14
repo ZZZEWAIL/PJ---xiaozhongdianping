@@ -54,7 +54,7 @@ async def create_order(order_data: OrderCreate,
 # 获取店铺信息
         shop = await db.get(Shop, package.shop_id)
 
-        if coupon.shop_restriction and shop.name != coupon.shop_restriction:
+        if coupon.shop_restriction and shop and shop.name != coupon.shop_restriction:
             raise HTTPException(status_code=400, detail="该商户不可使用此优惠券")
 
         if coupon.category and shop and shop.category != coupon.category:
