@@ -42,12 +42,25 @@ async def create_order(order_data: OrderCreate,
             raise HTTPException(status_code=400, detail="该优惠券不可用或已使用")
 
         user_coupon, coupon = data
+        if coupon.min_spend and package.price < coupon.min_spend:
+            raise HTTPException(status_code=400, detail="最低消费金额未满足")
+    
+# 检查是否过期
+        if user_coupon.expires_at and date.time() >= user_coupon.expires_at:
+            user_coupon.status = CouponStatus.tus.expired
 
-        # 获取套餐所属店铺信息（用于校验店铺/品类限制）
+            await db.commit()
+            raise HTTPException(status_code=400, detail="该优惠券已过期")
+
+# 获取店铺信息
         shop = await db.get(Shop, package.shop_id)
-        
-        # 使用 Validator 模式依次执行所有优惠券校验
-        run_coupon_validators(coupon, user_coupon, package, shop)
+
+        if coupon.shop_restriction and shop.name != coupon.shop_restriction:
+            raise HTTPException(status_code=400, detail="该商户不可使用此优惠券")
+
+        if coupon.category and shop and shop.category != coupon.category:
+            raise HTTPException(status_code=400, detail="该商户不符合此类别")
+
 
         # 校验通过后，应用优惠券的折扣逻辑（策略模式）
         from backend.coupon_strategies import get_coupon_strategy
