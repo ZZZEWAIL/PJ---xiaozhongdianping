@@ -3,7 +3,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from datetime import datetime
 from typing import Dict, Any
-from backend.coupon_validators import run_coupon_validators
 from backend.database import get_db
 from backend.models import Package, Order, Coupon, UserCoupon, CouponStatus, Shop
 from backend.schema import OrderCreate, OrderCreated
