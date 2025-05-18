@@ -6,14 +6,6 @@
 @import '../base.css';
 @import '../components.css';
 
-/* 主容器样式 */
-
-.container {
-    max-width: 1000px;
-    margin: 0 auto;
-}
-
-
 /* 卡片样式 */
 
 .card {
