@@ -1,18 +1,5 @@
 /* frontend/css/components.css */
 
-/* 通用容器样式 */
-.container {
-    background-color: white;
-    padding: 2rem;
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-    width: 100%;
-    max-width: 400px;
-    margin: 0 auto;
-    margin-top: 10vh;
-    border: 1px solid #e0e0e0;
-}
-
 /* 通用表单样式 */
 form {
     margin-top: 1.5rem;

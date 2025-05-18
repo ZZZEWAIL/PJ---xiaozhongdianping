@@ -26,18 +26,6 @@ body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* 导航栏 */
-.navbar-brand i {
-    font-size: 1.5rem;
-    color: #fff;
-}
-
-.nav-link.active {
-    background: #495057;
-    border-radius: 5px;
-    padding: 0.5rem 1rem;
-}
-
 /* Hero Banner */
 .hero {
     background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);

@@ -23,33 +23,31 @@
 <body>
   <!-- NAVBAR -->
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <div class="container">
-      <a class="navbar-brand" href="#">小众点评</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-              data-bs-target="#navMenu" aria-controls="navMenu"
-              aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-
-      <div id="navMenu" class="collapse navbar-collapse">
-        <ul class="navbar-nav ms-auto">
-          <li class="nav-item"><a class="nav-link active" href="index.html">首页</a></li>
-          <li class="nav-item"><a class="nav-link" href="search.html">搜索</a></li>
-          <li class="nav-item"><a class="nav-link" href="#">关于我们</a></li>
-        </ul>
+      <div class="container">
+          <a class="navbar-brand d-flex align-items-center" href="#">
+              <i class="bi bi-shop me-2"></i> 小众点评
+          </a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu" aria-controls="navMenu" aria-expanded="false" aria-label="Toggle navigation">
+              <span class="navbar-toggler-icon"></span>
+          </button>
+          <div id="navMenu" class="collapse navbar-collapse">
+              <ul class="navbar-nav ms-auto">
+                  <li class="nav-item">
+                      <a class="nav-link active" href="index.html">首页</a>
+                  </li>
+                  <li class="nav-item">
+                      <a class="nav-link" href="search.html">附近商家</a>
+                  </li>
+                  <li class="nav-item">
+                      <a class="nav-link" href="my_orders.html">我的订单</a>
+                  </li>
+                  <li class="nav-item">
+                      <a class="nav-link" href="my_coupons.html">我的卡包</a>
+                  </li>
+              </ul>
+          </div>
       </div>
-    </div>
   </nav>
-
-  <!-- SIDEBAR -->
-  <div class="vertical-nav" id="sidebar">
-    <div id="half"><h1>导航</h1></div>
-    <ul>
-      <li><a href="#">菜单 1</a></li>
-      <li><a href="#">菜单 2</a></li>
-      <li><a href="#">菜单 3</a></li>
-    </ul>
-  </div>
 
   <!-- PAGE CONTENT -->
   <div class="page-content" id="content">
@@ -84,25 +82,6 @@
 
       <button id="logout-btn" class="btn btn-outline-danger btn-sm">登出</button>
 
-      <!-- 示例图片与内容 -->
-      <div id="image" class="my-4">
-        <img src="https://via.placeholder.com/300" alt="示例图片" class="img-fluid rounded shadow-sm" />
-      </div>
-
-      <p class="lead">这是一个示例内容区域，可以展示更多信息。</p>
-
-      <!-- 近期活动 -->
-      <div class="card-list my-4">
-        <h3>近期活动</h3>
-        <div class="card p-3 mb-3 shadow-sm">
-          <h4>活动 1</h4>
-          <p>这是一个示例活动描述，展示用户参与的活动信息。</p>
-        </div>
-        <div class="card p-3 shadow-sm">
-          <h4>活动 2</h4>
-          <p>另一个示例活动，展示更多内容。</p>
-        </div>
-      </div>
     </div>
   </div>
 
