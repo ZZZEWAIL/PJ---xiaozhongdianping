@@ -63,19 +63,26 @@
 
                 <!-- 优惠券选择 -->
                 <div class="coupon-section mb-4">
-                    <h4 class="section-title">优惠券</h4>
-                    <div class="form-check mb-2">
-                        <input class="form-check-input" type="checkbox" id="use-coupon">
-                        <label class="form-check-label" for="use-coupon">
-                            使用优惠券
-                        </label>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4 class="section-title mb-0">优惠券</h4>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="use-coupon" checked>
+                            <label class="form-check-label" for="use-coupon">使用优惠券</label>
+                        </div>
                     </div>
-                    <select class="form-select" id="coupon-select" disabled>
-                        <option value="">选择优惠券</option>
-                        <!-- 优惠券选项将动态填充 -->
-                    </select>
-                    <div id="coupon-restrictions" class="mt-2 small text-muted">
-                        <!-- 优惠券使用限制将动态填充 -->
+                    
+                    <div id="coupon-container" class="coupon-cards-container">
+                        <!-- 优惠券卡片将在此动态显示 -->
+                        <div class="text-center py-3">
+                            <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                <span class="visually-hidden">加载中...</span>
+                            </div>
+                            <span class="ms-2">正在加载优惠券...</span>
+                        </div>
+                    </div>
+                    
+                    <div id="coupon-details" class="mt-3 small text-muted d-none">
+                        <!-- 所选优惠券详情 -->
                     </div>
                 </div>
 

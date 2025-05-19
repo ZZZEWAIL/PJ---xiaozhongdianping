@@ -12,6 +12,7 @@ const API_BASE = "http://127.0.0.1:8000/api";
 let packageData = null;
 let availableCoupons = [];
 let selectedCoupon = null;
+let bestCoupon = null;
 
 // 页面加载完成后执行
 document.addEventListener('DOMContentLoaded', () => {
@@ -60,10 +61,10 @@ async function fetchAvailableCoupons() {
         }
 
         availableCoupons = await response.json();
-        populateCouponSelect();
+        displayCouponCards();
     } catch (err) {
         console.error('获取优惠券失败:', err);
-        // 不显示错误，因为优惠券是可选的
+        displayNoCoupons('无法加载优惠券，请稍后重试');
     }
 }
 
@@ -112,28 +113,168 @@ function parsePackageContents(contents) {
 }
 
 /**
- * 填充优惠券下拉选择框
+ * 显示优惠券卡片
  */
-function populateCouponSelect() {
-    const couponSelect = document.getElementById('coupon-select');
-
-    // 清空现有选项
-    couponSelect.innerHTML = '<option value="">选择优惠券</option>';
-
+function displayCouponCards() {
+    const couponContainer = document.getElementById('coupon-container');
+    
+    // 如果没有可用优惠券
     if (!availableCoupons || availableCoupons.length === 0) {
-        couponSelect.innerHTML = '<option value="" disabled>暂无可用优惠券</option>';
+        displayNoCoupons();
         return;
     }
-
-    // 添加优惠券选项
+    
+    // 计算每个优惠券的优惠金额并排序
+    if (packageData) {
+        // 计算每个优惠券的优惠金额
+        availableCoupons.forEach(couponInfo => {
+            couponInfo.discountAmount = calculateDiscountAmount(packageData.price, couponInfo.coupon);
+        });
+        
+        // 按优惠金额从高到低排序
+        availableCoupons.sort((a, b) => b.discountAmount - a.discountAmount);
+        
+        // 标记最佳优惠券
+        bestCoupon = availableCoupons[0];
+    }
+    
+    // 清空容器
+    couponContainer.innerHTML = '';
+    
+    // 添加"不使用优惠券"选项
+    const noCouponCard = document.createElement('div');
+    noCouponCard.className = 'coupon-card no-coupon';
+    noCouponCard.dataset.couponId = '';
+    noCouponCard.innerHTML = `
+        <i class="bi bi-x-circle mb-2" style="font-size: 1.5rem; color: #6c757d;"></i>
+        <div>不使用优惠券</div>
+    `;
+    couponContainer.appendChild(noCouponCard);
+    
+    // 添加所有可用优惠券
     availableCoupons.forEach(couponInfo => {
         const coupon = couponInfo.coupon;
-        const option = document.createElement('option');
-        option.value = couponInfo.id;  // 使用 UserCoupon 的 ID
-        option.textContent = `${coupon.name} (${formatCouponValue(coupon)})`;
-        option.dataset.coupon = JSON.stringify(couponInfo);
-        couponSelect.appendChild(option);
+        const isBest = couponInfo === bestCoupon;
+        
+        const card = document.createElement('div');
+        card.className = `coupon-card ${isBest ? 'selected' : ''}`;
+        card.dataset.couponId = couponInfo.id;
+        card.dataset.coupon = JSON.stringify(couponInfo);
+        
+        card.innerHTML = `
+            ${isBest ? '<div class="coupon-best-badge">最优惠</div>' : ''}
+            <div class="coupon-name">${coupon.name}</div>
+            <div class="coupon-discount">${formatCouponValue(coupon)}</div>
+            <div class="coupon-description">${coupon.description || '无使用限制'}</div>
+            <div class="coupon-expiry">有效期至 ${formatExpiryDate(couponInfo.expiry_date)}</div>
+        `;
+        
+        couponContainer.appendChild(card);
     });
+    
+    // 设置初始选择的优惠券
+    if (bestCoupon) {
+        selectedCoupon = bestCoupon;
+        updateCouponDetails(bestCoupon);
+    }
+    
+    // 更新金额显示
+    updateOrderAmount();
+    
+    // 添加点击事件
+    attachCouponEvents();
+}
+
+/**
+ * 显示没有可用优惠券的提示
+ * @param {string} message 显示消息
+ */
+function displayNoCoupons(message = '暂无可用优惠券') {
+    const couponContainer = document.getElementById('coupon-container');
+    
+    // 清空容器
+    couponContainer.innerHTML = '';
+    
+    // 添加"不使用优惠券"选项
+    const noCouponCard = document.createElement('div');
+    noCouponCard.className = 'coupon-card no-coupon selected';
+    noCouponCard.dataset.couponId = '';
+    noCouponCard.innerHTML = `
+        <i class="bi bi-x-circle mb-2" style="font-size: 1.5rem; color: #6c757d;"></i>
+        <div>不使用优惠券</div>
+    `;
+    couponContainer.appendChild(noCouponCard);
+    
+    // 添加无优惠券提示
+    const noAvailableCard = document.createElement('div');
+    noAvailableCard.className = 'coupon-card no-coupon';
+    noAvailableCard.style.backgroundColor = '#f8f9fa';
+    noAvailableCard.style.cursor = 'default';
+    noAvailableCard.innerHTML = `
+        <i class="bi bi-info-circle mb-2" style="font-size: 1.5rem; color: #6c757d;"></i>
+        <div>${message}</div>
+    `;
+    couponContainer.appendChild(noAvailableCard);
+    
+    // 添加点击事件
+    attachCouponEvents();
+}
+
+/**
+ * 为优惠券卡片添加点击事件
+ */
+function attachCouponEvents() {
+    const couponCards = document.querySelectorAll('.coupon-card');
+    
+    couponCards.forEach(card => {
+        card.addEventListener('click', () => {
+            // 如果未启用优惠券，不处理点击
+            const useCouponCheckbox = document.getElementById('use-coupon');
+            if (!useCouponCheckbox.checked) return;
+            
+            // 如果是无法选择的卡片（比如提示卡片），不处理点击
+            if (card.style.cursor === 'default') return;
+            
+            // 移除之前的选择
+            document.querySelectorAll('.coupon-card.selected').forEach(selected => {
+                selected.classList.remove('selected');
+            });
+            
+            // 添加选中样式
+            card.classList.add('selected');
+            
+            // 设置选中的优惠券
+            const couponId = card.dataset.couponId;
+            if (couponId) {
+                selectedCoupon = JSON.parse(card.dataset.coupon);
+                updateCouponDetails(selectedCoupon);
+            } else {
+                selectedCoupon = null;
+                document.getElementById('coupon-details').classList.add('d-none');
+            }
+            
+            // 更新订单金额
+            updateOrderAmount();
+        });
+    });
+}
+
+/**
+ * 更新所选优惠券详情显示
+ * @param {Object} couponInfo 优惠券信息
+ */
+function updateCouponDetails(couponInfo) {
+    const detailsContainer = document.getElementById('coupon-details');
+    const coupon = couponInfo.coupon;
+    
+    detailsContainer.innerHTML = `
+        <div><strong>${coupon.name}</strong> - ${formatCouponValue(coupon)}</div>
+        <div>${coupon.description || '无使用限制'}</div>
+        <div>优惠金额: ¥${calculateDiscountAmount(packageData.price, coupon).toFixed(2)}</div>
+        <div>有效期至: ${formatExpiryDate(couponInfo.expiry_date)}</div>
+    `;
+    
+    detailsContainer.classList.remove('d-none');
 }
 
 /**
@@ -146,12 +287,87 @@ function formatCouponValue(coupon) {
         case 'deduction':
             return `减${coupon.discount_value}元`;
         case 'fixed_amount':
-            return `${coupon.discount_value}元内免单`;
+            let display = `减至${coupon.discount_value}元`;
+            if (coupon.max_discount) {
+                display += `，最高减${coupon.max_discount}元`;
+            }
+            return display;
         case 'discount':
-            return `${coupon.discount_value * 10}折`;
+            let discountDisplay = `${coupon.discount_value * 10}折`;
+            if (coupon.max_discount) {
+                discountDisplay += `，最高减${coupon.max_discount}元`;
+            }
+            return discountDisplay;
         default:
             return '未知类型';
     }
+}
+
+/**
+ * 格式化过期日期
+ * @param {string} dateString 日期字符串
+ * @returns {string} 格式化后的日期
+ */
+function formatExpiryDate(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('zh-CN');
+}
+
+/**
+ * 计算优惠券折扣金额
+ * @param {number} originalPrice 原价
+ * @param {Object} coupon 优惠券数据
+ * @returns {number} 折扣金额
+ */
+function calculateDiscountAmount(originalPrice, coupon) {
+    let finalPrice = originalPrice;
+    let discountAmount = 0;
+    
+    switch (coupon.discount_type) {
+        case 'deduction':
+            // 固定金额减免
+            finalPrice = originalPrice - coupon.discount_value;
+            if (finalPrice < 0) finalPrice = 0;
+            discountAmount = originalPrice - finalPrice;
+            break;
+            
+        case 'fixed_amount':
+            // 减至固定金额（例如：减至0.1元券），考虑最大优惠限制
+            const potentialDiscount = originalPrice - coupon.discount_value;
+            // 如果原价低于固定金额，则不打折
+            if (originalPrice <= coupon.discount_value) {
+                discountAmount = 0;
+            } else {
+                // 检查是否有最大优惠限制
+                if (coupon.max_discount && potentialDiscount > coupon.max_discount) {
+                    discountAmount = coupon.max_discount;
+                } else {
+                    discountAmount = potentialDiscount;
+                }
+            }
+            finalPrice = originalPrice - discountAmount;
+            break;
+            
+        case 'discount':
+            // 折扣比例
+            finalPrice = originalPrice * coupon.discount_value;
+            // 检查是否有最大优惠限制
+            if (coupon.max_discount) {
+                const fullDiscount = originalPrice - finalPrice;
+                if (fullDiscount > coupon.max_discount) {
+                    finalPrice = originalPrice - coupon.max_discount;
+                }
+            }
+            // 四舍五入保留两位小数
+            finalPrice = Math.round(finalPrice * 100) / 100;
+            discountAmount = originalPrice - finalPrice;
+            break;
+            
+        default:
+            discountAmount = 0;
+    }
+    
+    return discountAmount;
 }
 
 /**
@@ -164,19 +380,8 @@ function updateOrderAmount() {
     let discountAmount = 0;
 
     // 计算优惠金额
-    if (selectedCoupon) {
-        const coupon = selectedCoupon.coupon;
-        switch (coupon.discount_type) {
-            case 'deduction':
-                discountAmount = coupon.discount_value;
-                break;
-            case 'fixed_amount':
-                discountAmount = Math.min(originalPrice, coupon.discount_value);
-                break;
-            case 'discount':
-                discountAmount = originalPrice * (1 - coupon.discount_value);
-                break;
-        }
+    if (selectedCoupon && document.getElementById('use-coupon').checked) {
+        discountAmount = calculateDiscountAmount(originalPrice, selectedCoupon.coupon);
     }
 
     // 更新显示
@@ -191,25 +396,18 @@ function updateOrderAmount() {
 function bindEvents() {
     // 优惠券复选框
     const useCouponCheckbox = document.getElementById('use-coupon');
-    const couponSelect = document.getElementById('coupon-select');
-
+    
     useCouponCheckbox.addEventListener('change', () => {
-        couponSelect.disabled = !useCouponCheckbox.checked;
+        const couponContainer = document.getElementById('coupon-container');
+        couponContainer.style.opacity = useCouponCheckbox.checked ? '1' : '0.5';
+        couponContainer.style.pointerEvents = useCouponCheckbox.checked ? 'auto' : 'none';
+        
         if (!useCouponCheckbox.checked) {
-            selectedCoupon = null;
-            couponSelect.value = '';
-            updateOrderAmount();
+            document.getElementById('coupon-details').classList.add('d-none');
+        } else if (selectedCoupon) {
+            document.getElementById('coupon-details').classList.remove('d-none');
         }
-    });
-
-    // 优惠券选择
-    couponSelect.addEventListener('change', () => {
-        const selectedOption = couponSelect.options[couponSelect.selectedIndex];
-        if (selectedOption && selectedOption.dataset.coupon) {
-            selectedCoupon = JSON.parse(selectedOption.dataset.coupon);
-        } else {
-            selectedCoupon = null;
-        }
+        
         updateOrderAmount();
     });
 
@@ -245,7 +443,7 @@ async function submitOrder() {
         // 构建订单数据
         const orderData = {
             package_id: packageData.id,
-            coupon_id: selectedCoupon ? selectedCoupon.id : null
+            coupon_id: selectedCoupon && document.getElementById('use-coupon').checked ? selectedCoupon.id : null
         };
 
         // 发送订单请求

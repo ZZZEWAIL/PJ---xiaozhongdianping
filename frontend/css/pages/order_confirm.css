@@ -179,30 +179,134 @@ h5 {
     margin-bottom: 1rem;
 }
 
-.form-select {
+/* 优惠券卡片容器 */
+.coupon-cards-container {
+    display: flex;
+    overflow-x: auto;
+    gap: 12px;
+    padding: 10px 0;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* 自定义滚动条 */
+.coupon-cards-container::-webkit-scrollbar {
+    height: 6px;
+}
+
+.coupon-cards-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.coupon-cards-container::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 10px;
+}
+
+.coupon-cards-container::-webkit-scrollbar-thumb:hover {
+    background: #aaa;
+}
+
+/* 优惠券卡片 */
+.coupon-card {
+    min-width: 200px;
+    max-width: 220px;
     border-radius: 8px;
-    padding: 0.5rem 1rem;
-    border: 1px solid #ced4da;
-    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    border: 1px solid #e9ecef;
+    padding: 12px;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    background-color: #fff;
+    overflow: hidden;
 }
 
-.form-select:focus {
-    border-color: #80bdff;
-    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+.coupon-card:after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 10px;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, #fff 70%);
+    pointer-events: none;
 }
 
-.form-select:disabled {
-    background-color: #e9ecef;
-    cursor: not-allowed;
+.coupon-card.selected {
+    border-color: #007bff;
+    background-color: #f0f7ff;
+    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.2);
 }
 
-#coupon-restrictions {
+.coupon-card.no-coupon {
+    border-style: dashed;
+    border-color: #dee2e6;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.coupon-card .coupon-name {
+    font-weight: 600;
+    font-size: 1rem;
+    margin-bottom: 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.coupon-card .coupon-discount {
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: #e74c3c;
+    margin-bottom: 5px;
+}
+
+.coupon-card .coupon-description {
     font-size: 0.85rem;
     color: #6c757d;
-    padding: 0.5rem;
+    margin-bottom: 5px;
+}
+
+.coupon-card .coupon-expiry {
+    font-size: 0.75rem;
+    color: #999;
+}
+
+.coupon-card .coupon-best-badge {
+    position: absolute;
+    top: -3px;
+    right: -3px;
+    background-color: #28a745;
+    color: white;
+    font-size: 0.7rem;
+    padding: 3px 8px;
+    border-radius: 0 8px 0 8px;
+    font-weight: 600;
+}
+
+/* 所选优惠券详情 */
+#coupon-details {
     background-color: #f8f9fa;
-    border-radius: 4px;
-    margin-top: 0.5rem;
+    border-radius: 6px;
+    padding: 10px 15px;
+}
+
+/* Switch toggle styles */
+.form-check-input:checked {
+    background-color: #198754;
+    border-color: #198754;
+}
+
+.form-switch .form-check-input {
+    width: 2.5em;
+}
+
+.form-check-label {
+    font-weight: 500;
 }
 
 
