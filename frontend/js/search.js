@@ -39,18 +39,107 @@ function init() {
         console.error('Sort select not found');
     }
 
+    const filterToggle = document.getElementById('filterToggle');
+    if (filterToggle) {
+        filterToggle.addEventListener('click', toggleFilters);
+        console.log('Filter toggle listener added');
+    } else {
+        console.error('Filter toggle not found');
+    }
+
     renderSearchHistory();
+    
+    // Load shops immediately on page load
+    loadShops(1);
 }
 
 document.addEventListener('DOMContentLoaded', init);
 
+// New function to toggle filters visibility
+function toggleFilters() {
+    const filterContainer = document.getElementById('filterContainer');
+    const filterIcon = document.querySelector('#filterToggle i');
+    
+    if (filterContainer.style.maxHeight === '0px' || filterContainer.style.maxHeight === '') {
+        filterContainer.style.maxHeight = '500px'; // Set a value large enough to show all content
+        filterIcon.classList.replace('bi-chevron-down', 'bi-chevron-up');
+    } else {
+        filterContainer.style.maxHeight = '0px';
+        filterIcon.classList.replace('bi-chevron-up', 'bi-chevron-down');
+    }
+}
+
+// New function to load all shops without keyword
+async function loadShops(page = 1) {
+    console.log('loadShops triggered');
+    const resultsContainer = document.getElementById('results');
+    resultsContainer.classList.add('loading');
+
+    const params = new URLSearchParams();
+    params.set('page', page);
+    params.set('page_size', '10');
+
+    // Apply any filters if they exist
+    if (currentFilters.ratings) {
+        params.append('ratings', currentFilters.ratings);
+    }
+    if (currentFilters.avg_cost_min) {
+        params.set('avg_cost_min', currentFilters.avg_cost_min);
+    }
+    if (currentFilters.avg_cost_max) {
+        params.set('avg_cost_max', currentFilters.avg_cost_max);
+    }
+    if (currentFilters.is_open) {
+        params.set('is_open', 'true');
+    }
+
+    // Apply sorting
+    const sortValue = document.getElementById('sortSelect').value;
+    if (sortValue === 'rating_desc') {
+        params.set('sort_by', 'rating');
+        params.set('sort_order', 'desc');
+    } else if (sortValue === 'rating_asc') {
+        params.set('sort_by', 'rating');
+        params.set('sort_order', 'asc');
+    } else if (sortValue === 'avg_desc') {
+        params.set('sort_by', 'avg_cost');
+        params.set('sort_order', 'desc');
+    } else if (sortValue === 'avg_asc') {
+        params.set('sort_by', 'avg_cost');
+        params.set('sort_order', 'asc');
+    } else {
+        params.set('sort_by', 'default');
+        params.set('sort_order', 'desc');
+    }
+
+    const url = `${API_BASE}?${params.toString()}`;
+    console.log('Load shops URL:', url);
+
+    try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        const response = await res.json();
+        lastFetchedData = response.data;
+        resultsContainer.classList.remove('loading');
+        showResults(response);
+    } catch (err) {
+        console.error('Fetch error:', err);
+        resultsContainer.classList.remove('loading');
+        document.getElementById('errorMessage').textContent = '加载失败，请稍后重试';
+        document.getElementById('errorMessage').classList.remove('d-none');
+    }
+}
+
 async function handleSearch(page = 1) {
     console.log('handleSearch triggered');
     const keyword = document.getElementById('searchInput').value.trim();
+    
+    // If no keyword provided, just load all shops
     if (!keyword) {
-        alert('请输入搜索关键字');
+        loadShops(page);
         return;
     }
+    
     console.log('Search triggered with keyword:', keyword);
     console.log('Raw keyword (hex):', Array.from(keyword).map(c => c.charCodeAt(0).toString(16)).join(' '));
 
@@ -118,14 +207,14 @@ async function applyFilters(page = 1) {
     const formData = new FormData(document.getElementById('filters'));
     const params = new URLSearchParams();
     const keyword = document.getElementById('searchInput').value.trim();
-    if (!keyword) {
-        alert('请输入搜索关键字');
-        return;
+    
+    // If keyword exists, add it to params
+    if (keyword) {
+        params.set('keyword', keyword);
+        console.log('Filter triggered with keyword:', keyword);
+        console.log('Raw keyword (hex):', Array.from(keyword).map(c => c.charCodeAt(0).toString(16)).join(' '));
     }
-    console.log('Filter triggered with keyword:', keyword);
-    console.log('Raw keyword (hex):', Array.from(keyword).map(c => c.charCodeAt(0).toString(16)).join(' '));
-
-    params.set('keyword', keyword);
+    
     params.set('page', page);
     params.set('page_size', '10');
 
@@ -195,7 +284,9 @@ async function applyFilters(page = 1) {
         lastFetchedData = response.data;
         resultsContainer.classList.remove('loading');
         showResults(response);
-        await renderSearchHistory();
+        if (keyword) {
+            await renderSearchHistory();
+        }
     } catch (err) {
         console.error('Filter fetch error:', err);
         resultsContainer.classList.remove('loading');
@@ -208,15 +299,14 @@ async function applySortAndShow(page = 1) {
     lastFetchedData = [];
     const sortValue = document.getElementById('sortSelect').value;
     const keyword = document.getElementById('searchInput').value.trim();
-    if (!keyword) {
-        alert('请输入搜索关键字');
-        return;
-    }
-    console.log('Sort triggered with keyword:', keyword);
-    console.log('Raw keyword (hex):', Array.from(keyword).map(c => c.charCodeAt(0).toString(16)).join(' '));
-
+    
     const params = new URLSearchParams();
-    params.set('keyword', keyword);
+    if (keyword) {
+        params.set('keyword', keyword);
+        console.log('Sort triggered with keyword:', keyword);
+        console.log('Raw keyword (hex):', Array.from(keyword).map(c => c.charCodeAt(0).toString(16)).join(' '));
+    }
+    
     params.set('page', page);
     params.set('page_size', '10');
 
@@ -264,7 +354,9 @@ async function applySortAndShow(page = 1) {
         lastFetchedData = response.data;
         resultsContainer.classList.remove('loading');
         showResults(response);
-        await renderSearchHistory();
+        if (keyword) {
+            await renderSearchHistory();
+        }
     } catch (err) {
         console.error('Sort fetch error:', err);
         resultsContainer.classList.remove('loading');

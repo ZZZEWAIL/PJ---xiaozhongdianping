@@ -9,6 +9,19 @@
     <link rel="stylesheet" href="./css/base.css" />
     <link rel="stylesheet" href="./css/components.css" />
     <link rel="stylesheet" href="./css/pages/search.css" />
+    <style>
+        .filter-toggle {
+            cursor: pointer;
+            padding: 8px 0;
+        }
+        .filter-toggle:hover {
+            color: #0d6efd;
+        }
+        .filter-container {
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+    </style>
 </head>
 
 <body>
@@ -63,68 +76,74 @@
             </button>
         </div>
 
-        <!-- FILTER + SORT Section -->
+        <!-- FILTER + SORT Section - Made collapsible -->
         <div class="section-box card-style">
-            <h2 class="mb-3">筛选 & 排序</h2>
-            <form id="filters" class="row g-2">
-                <div class="col-12 col-md-4">
-                    <div class="form-check">
-                        <input class="form-check-input transition" type="checkbox" name="ratings" value="4"
-                            id="rating4">
-                        <label class="form-check-label" for="rating4">
-                            <i class="bi bi-star-fill me-1 text-warning"></i>
-                            <span class="badge bg-info">评分 >= 4.0</span>
-                        </label>
+            <div class="filter-toggle d-flex justify-content-between align-items-center" id="filterToggle">
+                <h2 class="mb-0">筛选 & 排序</h2>
+                <i class="bi bi-chevron-down"></i>
+            </div>
+            
+            <div class="filter-container mt-3" id="filterContainer" style="max-height: 0px;">
+                <form id="filters" class="row g-2">
+                    <div class="col-12 col-md-4">
+                        <div class="form-check">
+                            <input class="form-check-input transition" type="checkbox" name="ratings" value="4"
+                                id="rating4">
+                            <label class="form-check-label" for="rating4">
+                                <i class="bi bi-star-fill me-1 text-warning"></i>
+                                <span class="badge bg-info">评分 >= 4.0</span>
+                            </label>
+                        </div>
                     </div>
-                </div>
-                <div class="col-12 col-md-4">
-                    <div class="form-check">
-                        <input class="form-check-input transition" type="checkbox" name="avg_cost" value="60-120"
-                            id="priceRange">
-                        <label class="form-check-label" for="priceRange">
-                            <i class="bi bi-currency-yen me-1 text-success"></i>
-                            <span class="badge bg-success">人均 60-120</span>
-                        </label>
+                    <div class="col-12 col-md-4">
+                        <div class="form-check">
+                            <input class="form-check-input transition" type="checkbox" name="avg_cost" value="60-120"
+                                id="priceRange">
+                            <label class="form-check-label" for="priceRange">
+                                <i class="bi bi-currency-yen me-1 text-success"></i>
+                                <span class="badge bg-success">人均 60-120</span>
+                            </label>
+                        </div>
                     </div>
-                </div>
-                <div class="col-12 col-md-4">
-                    <div class="form-check">
-                        <input class="form-check-input transition" type="checkbox" name="avg_cost" value="30-60"
-                            id="avgRange">
-                        <label class="form-check-label" for="avgRange">
-                            <i class="bi bi-currency-yen me-1 text-success"></i>
-                            <span class="badge bg-success">人均 30-60</span>
-                        </label>
+                    <div class="col-12 col-md-4">
+                        <div class="form-check">
+                            <input class="form-check-input transition" type="checkbox" name="avg_cost" value="30-60"
+                                id="avgRange">
+                            <label class="form-check-label" for="avgRange">
+                                <i class="bi bi-currency-yen me-1 text-success"></i>
+                                <span class="badge bg-success">人均 30-60</span>
+                            </label>
+                        </div>
                     </div>
-                </div>
-                <div class="col-12 col-md-4">
-                    <div class="form-check">
-                        <input class="form-check-input transition" type="checkbox" name="is_open" value="true"
-                            id="isOpen">
-                        <label class="form-check-label" for="isOpen">
-                            <i class="bi bi-clock-fill me-1 text-warning"></i>
-                            <span class="badge bg-warning">营业中</span>
-                        </label>
+                    <div class="col-12 col-md-4">
+                        <div class="form-check">
+                            <input class="form-check-input transition" type="checkbox" name="is_open" value="true"
+                                id="isOpen">
+                            <label class="form-check-label" for="isOpen">
+                                <i class="bi bi-clock-fill me-1 text-warning"></i>
+                                <span class="badge bg-warning">营业中</span>
+                            </label>
+                        </div>
                     </div>
-                </div>
-                <div class="col-12">
-                    <button class="btn btn-success transition" type="submit">应用筛选</button>
-                </div>
-            </form>
+                    <div class="col-12">
+                        <button class="btn btn-success transition" type="submit">应用筛选</button>
+                    </div>
+                </form>
 
-            <div class="mt-4">
-                <label for="sortSelect" class="fw-bold me-2"><i class="bi bi-sort-down me-1"></i>排序方式:</label>
-                <select id="sortSelect" class="form-select d-inline-block w-auto transition">
-                    <option value="default">综合排序</option>
-                    <option value="rating_desc">评分最高</option>
-                    <option value="avg_desc">人均消费最高</option>
-                </select>
+                <div class="mt-4">
+                    <label for="sortSelect" class="fw-bold me-2"><i class="bi bi-sort-down me-1"></i>排序方式:</label>
+                    <select id="sortSelect" class="form-select d-inline-block w-auto transition">
+                        <option value="default">综合排序</option>
+                        <option value="rating_desc">评分最高</option>
+                        <option value="avg_desc">人均消费最高</option>
+                    </select>
+                </div>
             </div>
         </div>
 
-        <!-- RESULTS Section -->
+        <!-- RESULTS Section - Moved above filters -->
         <div class="section-box card-style">
-            <h2 class="mb-3">结果列表</h2>
+            <h2 class="mb-3">商家列表</h2>
             <div id="results" class="results-list"></div>
             <div id="pagination" class="mt-3"></div>
             <div id="errorMessage" class="alert alert-danger d-none" role="alert"></div>
