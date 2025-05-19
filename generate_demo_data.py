@@ -13,7 +13,7 @@ from backend.models import Base, DiscountType, ExpiryType, CouponStatus, User, S
 from sqlalchemy.orm import Session
 import bcrypt
 from datetime import datetime
-from typing import Dict
+from typing import Dict, List, Tuple, Any, Optional
 
 # Demo data (copied/adapted from backend/seed_demo_data.py)
 USERS = [
@@ -25,23 +25,110 @@ SHOPS = [
     dict(
         name="新发现（五角场万达店）",
         category="中餐",
+        rating=4.7,
+        price_range="¥¥",
+        avg_cost=120.0,
+        name_pinyin="xinfaxian(wujiaochang wanda dian)",
+        category_pinyin="zhongcan",
+        address="上海市杨浦区邯郸路600号万达广场3层301室",
+        phone="021-55555555",
+        business_hours="10:00-22:00",
+        image_url="https://example.com/images/xinfaxian.jpg",
         packages=[
-            ("家庭小聚三人餐", 199),
-            ("招牌甄选三人餐", 209),
+            dict(
+                title="家庭小聚三人餐",
+                price=199,
+                description="适合3人分享的美味套餐，包含多种经典菜品",
+                contents="红烧肉×1 + 宫保鸡丁×1 + 干锅土豆片×1 + 蒜蓉油麦菜×1 + 米饭×3 + 饮料×3",
+                sales=128
+            ),
+            dict(
+                title="招牌甄选三人餐",
+                price=209,
+                description="厨师推荐的3人精选套餐，包含店内招牌菜品",
+                contents="招牌烤鸭×1 + 鱼香肉丝×1 + 水煮牛肉×1 + 上汤娃娃菜×1 + 米饭×3 + 甜点×3",
+                sales=156
+            ),
         ],
     ),
     dict(
         name="茶百道（五角场中心店）",
         category="奶茶",
+        rating=4.5,
+        price_range="¥",
+        avg_cost=18.0,
+        name_pinyin="chabaidao(wujiaochang zhongxin dian)",
+        category_pinyin="naicha",
+        address="上海市杨浦区淞沪路77号大西洋百货1层",
+        phone="021-66666666",
+        business_hours="09:00-22:30",
+        image_url="https://example.com/images/chabaidao.jpg",
         packages=[
-            ("葡萄系列3选1", 11),
+            dict(
+                title="葡萄系列3选1",
+                price=11,
+                description="招牌葡萄系列饮品优惠券，可3选1",
+                contents="水晶葡萄×1 或 葡萄啵啵×1 或 葡萄冻冻×1（大杯）",
+                sales=532
+            ),
         ],
     ),
     dict(
         name="喜茶（五角场万达店）",
         category="奶茶",
+        rating=4.8,
+        price_range="¥¥",
+        avg_cost=30.0,
+        name_pinyin="xicha(wujiaochang wanda dian)",
+        category_pinyin="naicha",
+        address="上海市杨浦区邯郸路600号万达广场2层201室",
+        phone="021-77777777",
+        business_hours="10:00-22:00",
+        image_url="https://example.com/images/xicha.jpg",
         packages=[
-            ("时令白芭乐2选1", 19),
+            dict(
+                title="时令白芭乐2选1",
+                price=19,
+                description="精选白芭乐水果制作，口感清爽",
+                contents="满杯白芭乐×1 或 芝芝莓莓×1（标准杯）",
+                sales=423
+            ),
+            dict(
+                title="多肉车厘双人分享装",
+                price=36,
+                description="人气多肉系列，2杯组合特惠",
+                contents="多肉葡萄×1 + 多肉车厘×1（标准杯）",
+                sales=265
+            ),
+        ],
+    ),
+    dict(
+        name="汉堡王（五角场合生汇店）",
+        category="西餐",
+        rating=4.4,
+        price_range="¥¥",
+        avg_cost=45.0,
+        name_pinyin="hanbaowang(wujiaochang hesheng hui dian)",
+        category_pinyin="xican",
+        address="上海市杨浦区淞沪路1号合生汇商场B1层",
+        phone="021-88888888",
+        business_hours="09:00-21:30",
+        image_url="https://example.com/images/burgerking.jpg",
+        packages=[
+            dict(
+                title="双人超值套餐",
+                price=75,
+                description="经典汉堡双人套餐，超值享受",
+                contents="皇堡×1 + 辣味皇堡×1 + 薯条（中）×2 + 可乐（中）×2",
+                sales=312
+            ),
+            dict(
+                title="家庭欢享四人餐",
+                price=159,
+                description="全家欢聚首选，多种美食一次满足",
+                contents="皇堡×2 + 辣味皇堡×1 + 芝士汉堡×1 + 薯条（大）×2 + 洋葱圈×1 + 可乐（中）×4",
+                sales=178
+            ),
         ],
     ),
 ]
@@ -138,19 +225,31 @@ def insert_demo_data():
         create_coupons(COUPONS_BOB, "Bob")
         # Shops & Packages
         for s in SHOPS:
-            shop = Shop(name=s["name"], category=s["category"])
+            shop = Shop(
+                name=s["name"],
+                category=s["category"],
+                rating=s["rating"],
+                price_range=s["price_range"],
+                avg_cost=s["avg_cost"],
+                name_pinyin=s["name_pinyin"],
+                category_pinyin=s["category_pinyin"],
+                address=s["address"],
+                phone=s["phone"],
+                business_hours=s["business_hours"],
+                image_url=s["image_url"],
+            )
             db.add(shop)
             db.flush()
-            for title, price in s["packages"]:
-                pkg = Package(
-                    title=title,
-                    price=price,
-                    description=f"{title}（演示套餐）",
-                    contents="请根据需要自行修改",
-                    sales=0,
+            for pkg in s["packages"]:
+                package = Package(
+                    title=pkg["title"],
+                    price=pkg["price"],
+                    description=pkg["description"],
+                    contents=pkg["contents"],
+                    sales=pkg["sales"],
                     shop_id=shop.id,
                 )
-                db.add(pkg)
+                db.add(package)
         db.commit()
     print("Demo data inserted.")
 
