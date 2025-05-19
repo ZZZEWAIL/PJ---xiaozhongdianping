@@ -35,6 +35,7 @@ class Package(BaseModel):
     price: float
     description: str | None
     contents: str
+    sales: int
 
     class Config:
         from_attributes = True
