@@ -60,7 +60,7 @@ def is_shop_open(business_hours: str, current_time: datetime) -> bool:
 
 @router.get("/shops/search")
 async def search_shops(
-    keyword: str,
+    keyword: str | None = None,
     categories: list[str] = Query(None),
     ratings: list[float] = Query(None),
     category: str | None = None,
@@ -74,33 +74,39 @@ async def search_shops(
     page_size: int = 10,
     db: AsyncSession = Depends(get_db)
 ):
-    print(f"Received keyword: {keyword}")
-    existing_history = await db.execute(
-        select(SearchHistory).where(SearchHistory.keyword == keyword)
-    )
-    existing_history = existing_history.scalars().first()
+    # Initialize base query for all shops
+    query = select(Shop)
+    
+    # Only add search filtering if keyword is provided
+    if keyword:
+        print(f"Received keyword: {keyword}")
+        existing_history = await db.execute(
+            select(SearchHistory).where(SearchHistory.keyword == keyword)
+        )
+        existing_history = existing_history.scalars().first()
 
-    if existing_history:
-        existing_history.searched_at = datetime.utcnow()
-        await db.commit()
-        await db.refresh(existing_history)
-    else:
-        new_history = SearchHistory(keyword=keyword)
-        db.add(new_history)
-        await db.commit()
-        await db.refresh(new_history)
+        if existing_history:
+            existing_history.searched_at = datetime.utcnow()
+            await db.commit()
+            await db.refresh(existing_history)
+        else:
+            new_history = SearchHistory(keyword=keyword)
+            db.add(new_history)
+            await db.commit()
+            await db.refresh(new_history)
 
-    keyword_pinyin_list = pinyin(keyword, style=Style.NORMAL)
-    keyword_pinyin = ' '.join([item[0] for item in keyword_pinyin_list])
-    print(f"Keyword pinyin: {keyword_pinyin}")
+        keyword_pinyin_list = pinyin(keyword, style=Style.NORMAL)
+        keyword_pinyin = ' '.join([item[0] for item in keyword_pinyin_list])
+        print(f"Keyword pinyin: {keyword_pinyin}")
 
-    query = select(Shop).where(
-        (Shop.name.ilike(f"%{keyword}%")) |
-        (Shop.category.ilike(f"%{keyword}%")) |
-        (Shop.name_pinyin.ilike(f"%{keyword_pinyin}%")) |
-        (Shop.category_pinyin.ilike(f"%{keyword_pinyin}%"))
-    )
+        query = query.where(
+            (Shop.name.ilike(f"%{keyword}%")) |
+            (Shop.category.ilike(f"%{keyword}%")) |
+            (Shop.name_pinyin.ilike(f"%{keyword_pinyin}%")) |
+            (Shop.category_pinyin.ilike(f"%{keyword_pinyin}%"))
+        )
 
+    # Apply other filters
     if category:
         query = query.where(Shop.category == category)
     if rating:
