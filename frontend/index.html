@@ -111,11 +111,10 @@
         */
       }
 
-      // 2️⃣  New‑user coupon button
       document.getElementById('newUserCouponBtn')
         ?.addEventListener('click', async () => {
           try {
-            const res = await fetch('http://127.0.0.1:8000/api/coupons/new_user', {
+            const res = await fetch('/api/coupons/new_user', {
               method: 'POST',
               credentials: 'include',
               headers: {
@@ -127,24 +126,37 @@
               alert(data.detail || 'Failed to claim new user coupon.');
               return;
             }
-            alert('New user coupon claimed successfully!');
+            alert('优惠券领取成功！');
             // Optionally redirect to coupon page
             // location.href = 'my_coupons.html';
           } catch (err) {
-            alert('Network error. Please try again later.');
+            alert('领取失败，请稍后再试。');
           }
         });
 
-      // 3️⃣  Sidebar toggle (click brand area)
       document.querySelector('nav').addEventListener('click', e => {
         if (e.target.tagName === 'A') return;
         document.getElementById('sidebar')?.classList.toggle('active');
         document.getElementById('content')?.classList.toggle('active');
       });
 
-      // 4️⃣  Dummy logout (offline mode just reloads)
       document.getElementById('logout-btn')
-        ?.addEventListener('click', () => location.href = 'login.html');
+        ?.addEventListener('click', async () => {
+          try {
+            const res = await fetch('/auth/logout', {
+              method: 'POST',
+              credentials: 'include'
+            });
+            if (!res.ok) {
+              const data = await res.json().catch(() => ({}));
+              alert(data.detail || '登出失败。');
+              return;
+            }
+            location.href = 'login.html';
+          } catch (err) {
+            alert('登出失败，请稍后再试。');
+          }
+        });
     });
   </script>
 </body>
