@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>首页 · 小众点评</title>
 
-  <!-- Bootstrap CSS + Icons -->
+  <!-- Bootstrap CSS + Icons -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
 
@@ -55,9 +55,9 @@
       <p>登录时间：<span id="login-time"></span></p>
 
       <!-- 领取新人券 -->
-      <button id="newUserCouponBtn" class="btn btn-warning btn-lg shadow-sm my-3">
+      <a href="new_user_coupon.html" id="newUserCouponBtn" class="btn btn-warning btn-lg shadow-sm my-3">
         <i class="bi bi-ticket-perforated me-2"></i> 领取新人券
-      </button>
+      </a>
 
       <!-- 快捷导航 -->
       <div class="row row-cols-1 row-cols-md-3 g-3 my-4">
@@ -83,7 +83,7 @@
     </div>
   </div>
 
-  <!-- Bootstrap JS (required for navbar toggler) -->
+  <!-- Bootstrap JS (required for navbar toggler) -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
   <!-- 💡 Inline script to bypass backend auth while developing -->
@@ -110,29 +110,6 @@
         }).catch(() => location.href = 'login.html');
         */
       }
-
-      document.getElementById('newUserCouponBtn')
-        ?.addEventListener('click', async () => {
-          try {
-            const res = await fetch('/api/coupons/new_user', {
-              method: 'POST',
-              credentials: 'include',
-              headers: {
-                'Content-Type': 'application/json'
-              }
-            });
-            if (!res.ok) {
-              const data = await res.json().catch(() => ({}));
-              alert(data.detail || 'Failed to claim new user coupon.');
-              return;
-            }
-            alert('优惠券领取成功！');
-            // Optionally redirect to coupon page
-            // location.href = 'my_coupons.html';
-          } catch (err) {
-            alert('领取失败，请稍后再试。');
-          }
-        });
 
       document.querySelector('nav').addEventListener('click', e => {
         if (e.target.tagName === 'A') return;

@@ -1,5 +1,7 @@
 from pydantic import BaseModel
+from typing import List, Optional, Dict, Any
 from datetime import datetime
+from enum import Enum
 from backend.models import DiscountType, ExpiryType, CouponStatus
 
 class LoginForm(BaseModel):
@@ -33,7 +35,6 @@ class Package(BaseModel):
     price: float
     description: str | None
     contents: str
-    sales: int
 
     class Config:
         from_attributes = True
@@ -74,21 +75,22 @@ class OrderCreated(BaseModel):
 # ---------------- 优惠券相关 ---------------- #
 class Coupon(BaseModel):
     """
-    优惠券基本字段（与 Coupon ORM 映射）
+    Coupon schema for API responses
     """
     id: int
     name: str
-    description: str | None = None
+    description: Optional[str] = None
     discount_type: str
     discount_value: float
-    min_spend: float
-    max_discount: float | None = None
-    category: str | None = None
-    shop_restriction: str | None = None
-    expiry_date: datetime | None = None
-    total_quantity: int | None = None
-    remaining_quantity: int | None = None
-    per_user_limit: int | None = None
+    min_spend: float = 0
+    max_discount: Optional[float] = None
+    category: Optional[str] = None 
+    shop_restriction: Optional[str] = None
+    expiry_type: Optional[str] = None
+    expiry_date: Optional[datetime] = None
+    valid_days: Optional[int] = None
+    total_quantity: Optional[int] = None
+    remaining_quantity: Optional[int] = None
 
     class Config:
         from_attributes = True
@@ -96,12 +98,12 @@ class Coupon(BaseModel):
 
 class UserCouponInfo(BaseModel):
     """
-    用户卡包中单张券的信息（含状态）
+    User coupon info with status and expiry info
     """
     id: int
-    status: str               # unused / used / expired
-    expires_at: datetime | None = None
-    coupon: Coupon            # 嵌套优惠券基本信息
+    status: str  # unused / used / expired
+    expires_at: Optional[datetime] = None
+    coupon: Coupon
 
     class Config:
         from_attributes = True
@@ -109,8 +111,34 @@ class UserCouponInfo(BaseModel):
 
 class CouponListResponse(BaseModel):
     """
-    /user/coupons 返回的结构：按状态分类
+    Response model for listing user coupons categorized by status
     """
-    unused: list[UserCouponInfo]
-    used: list[UserCouponInfo]
-    expired: list[UserCouponInfo]
+    unused: List[UserCouponInfo]
+    used: List[UserCouponInfo]
+    expired: List[UserCouponInfo]
+
+
+class NewUserCouponDTO(BaseModel):
+    """
+    DTO for new user coupons available for selection
+    """
+    id: int
+    type: str  # kfc, milk_tea, or discount
+    name: str
+    description: Optional[str] = None
+    discount_type: str
+    discount_value: float
+    min_spend: float = 0
+    max_discount: Optional[float] = None
+    category: Optional[str] = None
+    shop_restriction: Optional[str] = None
+    valid_days: Optional[int] = None
+    remaining: str  # "剩余xxx张" or "已发完"
+
+
+class NewUserCouponResponse(BaseModel):
+    """
+    Response model for new user coupon listing
+    """
+    eligible: bool  # Whether the user is eligible to claim a new user coupon
+    coupons: List[NewUserCouponDTO] = []

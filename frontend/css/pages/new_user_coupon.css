@@ -1,0 +1,121 @@
+/**
+ * New User Coupon Page Styles
+ */
+
+/* Hero Section */
+.new-user-hero {
+    position: relative;
+}
+
+.new-user-hero::after {
+    content: "";
+    position: absolute;
+    top: -1rem;
+    right: 3rem;
+    width: 80px;
+    height: 80px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23dc3545' class='bi bi-gift-fill' viewBox='0 0 16 16'%3E%3Cpath d='M3 2.5a2.5 2.5 0 0 1 5 0 2.5 2.5 0 0 1 5 0v.006c0 .07 0 .27-.038.494H15a1 1 0 0 1 1 1v1a1 1 0 0 1-1 1H1a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h2.038A2.968 2.968 0 0 1 3 2.506V2.5zm1.068.5H7v-.5a1.5 1.5 0 1 0-3 0c0 .085.002.274.045.43a.522.522 0 0 0 .023.07zM9 3h2.932a.56.56 0 0 0 .023-.07c.043-.156.045-.345.045-.43a1.5 1.5 0 0 0-3 0V3zm6 4v7.5a1.5 1.5 0 0 1-1.5 1.5H9V7h6zM2.5 16A1.5 1.5 0 0 1 1 14.5V7h6v9H2.5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-size: contain;
+    opacity: 0.1;
+    transform: rotate(-15deg);
+    z-index: 0;
+}
+
+/* Coupon Cards */
+.card {
+    overflow: hidden;
+    transition: transform 0.3s;
+    border-width: 2px;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.card-title {
+    font-weight: 600;
+}
+
+.discount-value {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #dc3545;
+}
+
+/* Customize coupon card styles by type */
+.card.border-danger .discount-value {
+    color: #dc3545;
+}
+
+.card.border-info .discount-value {
+    color: #0dcaf0;
+}
+
+.card.border-warning .discount-value {
+    color: #ffc107;
+}
+
+/* Add a decorative element to coupon cards */
+.card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 30px;
+    height: 30px;
+    background-color: rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    transform: translate(-15px, -15px);
+}
+
+/* Decorative coupon notches */
+.card::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: -10px;
+    width: 20px;
+    height: 20px;
+    background-color: #f8f9fa;
+    border-radius: 50%;
+}
+
+.card .card-body::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: -10px;
+    width: 20px;
+    height: 20px;
+    background-color: #f8f9fa;
+    border-radius: 50%;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .card {
+        margin-bottom: 1.5rem;
+    }
+}
+
+/* Button styles */
+.claim-btn {
+    font-weight: 600;
+}
+
+/* Success modal styles */
+#successModal .modal-body {
+    padding: 2rem 1rem;
+}
+
+#successModal .modal-body i {
+    display: block;
+    margin-bottom: 1rem;
+}
+
+/* Badge styles */
+.badge {
+    font-weight: normal;
+    padding: 0.5em 0.8em;
+} 

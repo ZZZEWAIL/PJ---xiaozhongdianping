@@ -1,15 +1,16 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, func
 from datetime import datetime
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional, Literal
 from backend.database import get_db
 from backend.models import (
     Coupon, UserCoupon, CouponStatus,
     DiscountType, ExpiryType, Package, Shop
 )
 from backend.schema import (
-    CouponListResponse, UserCouponInfo, Coupon as CouponSchema
+    CouponListResponse, UserCouponInfo, Coupon as CouponSchema,
+    NewUserCouponResponse, NewUserCouponDTO
 )
 from backend.login import get_current_user
 from backend.coupon_factory import CouponFactory
@@ -17,45 +18,215 @@ from backend.coupon_factory import CouponFactory
 router = APIRouter()
 
 # ------------------------- 新人券发放 ------------------------- #
-@router.post("/coupons/new_user")
-async def grant_new_user_coupons(
+@router.get("/coupons/new_user/available", response_model=NewUserCouponResponse)
+async def list_new_user_coupons(
         db: AsyncSession = Depends(get_db),
         current_user: Dict[str, Any] = Depends(get_current_user)):
     """
-    新用户领取新人优惠券
-    - 若系统尚未创建新人券定义，则先创建一张
-    - 同一用户限领一次（由工厂方法内部校验）
+    获取可供新用户选择的优惠券列表
+    - 返回三种类型的新人券供用户选择
+    - 检查用户是否有资格领取（未使用过点评购买过团购套餐的用户）
+    - 同一用户只能领取一张新人券（三选一）
     """
     user_id = current_user["id"]
 
-    # 查询是否已有“新用户优惠券”定义
-    result = await db.execute(select(Coupon).where(Coupon.name == "新用户优惠券"))
-    coupon = result.scalars().first()
-
-    if not coupon:
-        # 若无定义则创建一张新人券（示例：无门槛减 10 元，30 天有效）
-        coupon = CouponFactory.create_coupon(
-            name="新用户优惠券",
-            description="新用户专享满减券",
-            discount_type=DiscountType.deduction,
-            discount_value=10.0,
-            min_spend=0,
-            expiry_type=ExpiryType.valid_days,
-            valid_days=30,
-            total_quantity=1000,
-            per_user_limit=1
+    # 检查用户是否已领取过新人券
+    result = await db.execute(select(func.count(UserCoupon.id)).where(
+        UserCoupon.user_id == user_id,
+        UserCoupon.coupon_id.in_(
+            select(Coupon.id).where(
+                Coupon.name.in_(["新人KFC9折券", "新人奶茶免单券", "新人100元优惠券"])
+            )
         )
-        db.add(coupon)
-        await db.flush()  # 刷新获取 coupon.id
+    ))
+    count = result.scalar() or 0
+    if count > 0:
+        raise HTTPException(status_code=400, detail="您已领取过新人优惠券")
 
+    # 检查用户是否已购买过团购套餐（这里需根据实际业务逻辑补充）
+    # TODO: 添加检查用户是否使用过"小众点评"购买过团购套餐的逻辑
+
+    # 获取或创建三种新人券定义
+    coupons = []
+    
+    # 1. KFC 9折券
+    kfc_coupon = await get_or_create_coupon(
+        db, 
+        name="新人KFC9折券",
+        description="满10元可用、整单9折券、仅限KFC南区店使用",
+        discount_type=DiscountType.discount,
+        discount_value=0.9,
+        min_spend=10.0,
+        shop_restriction="KFC南区店",
+        expiry_type=ExpiryType.valid_days,
+        valid_days=7,
+        total_quantity=10000,
+        per_user_limit=1
+    )
+    coupons.append(format_new_user_coupon(kfc_coupon, "kfc"))
+    
+    # 2. 奶茶免单券
+    milk_tea_coupon = await get_or_create_coupon(
+        db,
+        name="新人奶茶免单券",
+        description="无门槛免单券、最高抵扣15元、适用品类：奶茶",
+        discount_type=DiscountType.deduction,
+        discount_value=15.0,
+        min_spend=0,
+        max_discount=15.0,
+        category="奶茶",
+        expiry_type=ExpiryType.valid_days,
+        valid_days=7,
+        total_quantity=100,
+        per_user_limit=1
+    )
+    coupons.append(format_new_user_coupon(milk_tea_coupon, "milk_tea"))
+    
+    # 3. 100元优惠券
+    discount_coupon = await get_or_create_coupon(
+        db,
+        name="新人100元优惠券",
+        description="满200减100元券、全品类通用",
+        discount_type=DiscountType.deduction,
+        discount_value=100.0,
+        min_spend=200.0,
+        expiry_type=ExpiryType.valid_days,
+        valid_days=1,
+        total_quantity=1,
+        per_user_limit=1
+    )
+    coupons.append(format_new_user_coupon(discount_coupon, "discount"))
+
+    await db.commit()
+    return NewUserCouponResponse(eligible=True, coupons=coupons)
+
+
+@router.post("/coupons/new_user/claim/{coupon_type}")
+async def claim_new_user_coupon(
+        coupon_type: Literal["kfc", "milk_tea", "discount"],
+        db: AsyncSession = Depends(get_db),
+        current_user: Dict[str, Any] = Depends(get_current_user)):
+    """
+    用户领取指定类型的新人优惠券
+    - coupon_type: 用户选择的优惠券类型（kfc, milk_tea, discount）
+    - 确保用户有资格领取且未领取过任何新人券
+    - 创建用户优惠券记录并扣减库存
+    """
+    user_id = current_user["id"]
+    
+    # 检查用户是否已领取过新人券
+    result = await db.execute(select(func.count(UserCoupon.id)).where(
+        UserCoupon.user_id == user_id,
+        UserCoupon.coupon_id.in_(
+            select(Coupon.id).where(
+                Coupon.name.in_(["新人KFC9折券", "新人奶茶免单券", "新人100元优惠券"])
+            )
+        )
+    ))
+    count = result.scalar() or 0
+    if count > 0:
+        raise HTTPException(status_code=400, detail="您已领取过新人优惠券")
+    
+    # 检查用户是否已购买过团购套餐（这里需根据实际业务逻辑补充）
+    # TODO: 添加检查用户是否使用过"小众点评"购买过团购套餐的逻辑
+    
+    # 根据用户选择的类型获取对应优惠券
+    coupon_name = None
+    if coupon_type == "kfc":
+        coupon_name = "新人KFC9折券"
+    elif coupon_type == "milk_tea":
+        coupon_name = "新人奶茶免单券"
+    elif coupon_type == "discount":
+        coupon_name = "新人100元优惠券"
+    else:
+        raise HTTPException(status_code=400, detail="无效的优惠券类型")
+    
+    # 查询优惠券
+    result = await db.execute(select(Coupon).where(Coupon.name == coupon_name))
+    coupon = result.scalars().first()
+    
+    if not coupon:
+        raise HTTPException(status_code=404, detail="优惠券不存在")
+    
     # 为用户创建 UserCoupon 记录（工厂内部包含校验和库存扣减）
     try:
-        await CouponFactory.create_user_coupon(coupon, user_id, db)
+        user_coupon = await CouponFactory.create_user_coupon(coupon, user_id, db)
+        await db.commit()
+        return {
+            "message": f"成功领取{coupon.name}",
+            "coupon_id": user_coupon.id,
+            "expires_at": user_coupon.expires_at
+        }
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-    await db.commit()
-    return {"message": "新人优惠券领取成功"}
+
+# Helper function to get or create coupon definitions
+async def get_or_create_coupon(
+        db: AsyncSession,
+        name: str,
+        description: str,
+        discount_type: DiscountType,
+        discount_value: float,
+        min_spend: float = 0,
+        max_discount: float = None,
+        category: str = None,
+        shop_restriction: str = None,
+        expiry_type: ExpiryType = None,
+        expiry_date: datetime = None,
+        valid_days: int = None,
+        total_quantity: int = None,
+        per_user_limit: int = 1) -> Coupon:
+    """
+    获取或创建优惠券定义
+    如果不存在则创建，存在则返回已有优惠券
+    """
+    result = await db.execute(select(Coupon).where(Coupon.name == name))
+    coupon = result.scalars().first()
+    
+    if not coupon:
+        coupon = CouponFactory.create_coupon(
+            name=name,
+            description=description,
+            discount_type=discount_type,
+            discount_value=discount_value,
+            min_spend=min_spend,
+            max_discount=max_discount,
+            category=category,
+            shop_restriction=shop_restriction,
+            expiry_type=expiry_type,
+            expiry_date=expiry_date,
+            valid_days=valid_days,
+            total_quantity=total_quantity,
+            remaining_quantity=total_quantity,
+            per_user_limit=per_user_limit
+        )
+        db.add(coupon)
+        await db.flush()  # 刷新获取 coupon.id
+    
+    return coupon
+
+
+# Helper function to format coupon for response
+def format_new_user_coupon(coupon: Coupon, coupon_type: str) -> NewUserCouponDTO:
+    """Format coupon for new user response"""
+    remaining = "已发完" if coupon.remaining_quantity == 0 else f"剩余{coupon.remaining_quantity}张"
+    
+    return NewUserCouponDTO(
+        id=coupon.id,
+        type=coupon_type,
+        name=coupon.name,
+        description=coupon.description,
+        discount_type=coupon.discount_type.value,
+        discount_value=coupon.discount_value,
+        min_spend=coupon.min_spend,
+        max_discount=coupon.max_discount,
+        category=coupon.category,
+        shop_restriction=coupon.shop_restriction,
+        valid_days=coupon.valid_days,
+        remaining=remaining
+    )
+
 
 # ------------------------- 普通券领取 ------------------------- #
 @router.post("/coupons/{coupon_id}/claim")
