@@ -62,18 +62,18 @@
       <!-- 快捷导航 -->
       <div class="row row-cols-1 row-cols-md-3 g-3 my-4">
         <div class="col">
-          <a href="voucher.html" class="btn btn-outline-primary w-100 py-3">
-            <i class="bi bi-ticket-detailed me-2"></i> 查看券码
+          <a href="my_orders.html" class="btn btn-outline-primary w-100 py-3">
+            <i class="bi bi-ticket-detailed me-2"></i> 查看订单
           </a>
         </div>
         <div class="col">
-          <a href="package_detail.html" class="btn btn-outline-secondary w-100 py-3">
-            <i class="bi bi-box-seam me-2"></i> 套餐详情
+          <a href="my_coupons.html" class="btn btn-outline-secondary w-100 py-3">
+            <i class="bi bi-box-seam me-2"></i> 我的卡包
           </a>
         </div>
         <div class="col">
-          <a href="my_orders.html" class="btn btn-outline-success w-100 py-3">
-            <i class="bi bi-receipt-cutoff me-2"></i> 我的订单
+          <a href="search.html" class="btn btn-outline-success w-100 py-3">
+            <i class="bi bi-receipt-cutoff me-2"></i> 附近商家
           </a>
         </div>
       </div>
@@ -113,7 +113,27 @@
 
       // 2️⃣  New‑user coupon button
       document.getElementById('newUserCouponBtn')
-        ?.addEventListener('click', () => location.href = 'voucher.html#new');
+        ?.addEventListener('click', async () => {
+          try {
+            const res = await fetch('http://127.0.0.1:8000/api/coupons/new_user', {
+              method: 'POST',
+              credentials: 'include',
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            });
+            if (!res.ok) {
+              const data = await res.json().catch(() => ({}));
+              alert(data.detail || 'Failed to claim new user coupon.');
+              return;
+            }
+            alert('New user coupon claimed successfully!');
+            // Optionally redirect to coupon page
+            // location.href = 'my_coupons.html';
+          } catch (err) {
+            alert('Network error. Please try again later.');
+          }
+        });
 
       // 3️⃣  Sidebar toggle (click brand area)
       document.querySelector('nav').addEventListener('click', e => {
