@@ -88,28 +88,25 @@
 
   <!-- 💡 Inline script to bypass backend auth while developing -->
   <script>
-    const OFFLINE_MODE = true;   // set to false when backend is running
-
     document.addEventListener('DOMContentLoaded', () => {
-
       // 1️⃣  Display username / time
-      if (OFFLINE_MODE) {
-        document.getElementById('username').textContent = 'DemoUser';
+      fetch('/auth/status', {
+        credentials: 'include'
+      }).then(res => {
+        if (!res.ok) {
+          location.href = 'login.html';
+          return Promise.reject('Not authenticated');
+        }
+        return res.json();
+      }).then(data => {
+        document.getElementById('username').textContent = data.username;
         document.getElementById('login-time').textContent = new Date().toLocaleString();
-      } else {
-        // 🔒  Real check (uncomment when backend is up)
-        /*
-        fetch('http://127.0.0.1:8000/auth/protected-endpoint', {
-          credentials: 'include'
-        }).then(res => {
-          if (!res.ok) location.href = 'login.html';
-          return res.json();
-        }).then(data => {
-          document.getElementById('username').textContent = data.username;
-          document.getElementById('login-time').textContent = new Date().toLocaleString();
-        }).catch(() => location.href = 'login.html');
-        */
-      }
+      }).catch(error => {
+        console.error('Error fetching user status:', error);
+        if (error !== 'Not authenticated') {
+            location.href = 'login.html';
+        }
+      });
 
       document.querySelector('nav').addEventListener('click', e => {
         if (e.target.tagName === 'A') return;

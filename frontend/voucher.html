@@ -10,6 +10,26 @@
     <link href="css/voucher.css" rel="stylesheet">
     <!-- Add QR Code library -->
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <script>
+        fetch('/auth/status', { credentials: 'include' })
+            .then(res => {
+                if (!res.ok) {
+                    location.href = 'login.html';
+                    return Promise.reject('Not authenticated');
+                }
+                return res.json();
+            })
+            .then(data => {
+                // You can use data.username or data.id here if needed
+                console.log('User authenticated:', data.username);
+            })
+            .catch(error => {
+                if (error !== 'Not authenticated') {
+                    console.error('Auth check failed:', error);
+                    location.href = 'login.html'; // Fallback redirect
+                }
+            });
+    </script>
 </head>
 
 <body>

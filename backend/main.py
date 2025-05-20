@@ -29,6 +29,8 @@ app.include_router(filter_sort_router, prefix="/api", tags=["filter_sort"])
 app.include_router(orders_router,   prefix="/api",  tags=["orders"])
 app.include_router(coupons_router,  prefix="/api",  tags=["coupons"])
 
+from fastapi.staticfiles import StaticFiles
+app.mount("/", StaticFiles(directory="frontend"), name="static")
 
 @app.on_event("startup")
 async def startup():

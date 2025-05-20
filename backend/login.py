@@ -111,7 +111,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from backend.database import get_db
 from backend.models import User
-from backend.schema import LoginForm, Token
+from backend.schema import LoginForm, Token, UserStatus
 from typing import Dict
 import bcrypt
 import jwt
@@ -203,6 +203,12 @@ async def logout(response: Response):
     response.delete_cookie("access_token")
     return {"message": "Logged out successfully"}
 
-@router.get("/protected-endpoint")
-async def protected_endpoint(current_user: Dict[str, any] = Depends(get_current_user)):
-    return {"username": current_user["username"], "id": current_user["id"]}
+@router.get("/status", response_model=UserStatus)
+async def get_login_status(current_user: Dict[str, any] = Depends(get_current_user)):
+    """
+    Check user login status and return user information.
+
+    Returns:
+        UserStatus: Containing user ID and username.
+    """
+    return UserStatus(id=current_user["id"], username=current_user["username"])

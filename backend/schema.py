@@ -143,3 +143,10 @@ class NewUserCouponResponse(BaseModel):
     """
     eligible: bool  # Whether the user is eligible to claim a new user coupon
     coupons: List[NewUserCouponDTO] = []
+
+class UserStatus(BaseModel):
+    """
+    Response model for user login status
+    """
+    id: int
+    username: str
