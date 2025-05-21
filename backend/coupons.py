@@ -351,7 +351,7 @@ async def get_available_coupons(
 
         # --- 新增验证 ---
         # 1. 检查优惠券库存
-        if coupon.remaining_quantity <= 0:
+        if coupon.remaining_quantity and coupon.remaining_quantity <= 0:
             continue
 
         # 2. 检查用户使用限制
