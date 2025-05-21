@@ -349,6 +349,24 @@ async def get_available_coupons(
         if coupon.category and shop and shop.category != coupon.category:
             continue
 
+        # --- 新增验证 ---
+        # 1. 检查优惠券库存
+        if coupon.remaining_quantity <= 0:
+            continue
+
+        # 2. 检查用户使用限制
+        if coupon.per_user_limit:
+            used_count = await db.execute(
+                select(func.count(UserCoupon.id))
+                .where(
+                    UserCoupon.user_id == user_id,
+                    UserCoupon.coupon_id == coupon.id,
+                    UserCoupon.status == CouponStatus.used
+                )
+            )
+            if (used_count.scalar() or 0) >= coupon.per_user_limit:
+                continue
+
         # 满足条件，加入可用列表
         coupon_vo = CouponSchema.from_orm(coupon)
         available.append(
