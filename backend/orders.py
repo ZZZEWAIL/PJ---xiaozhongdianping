@@ -40,6 +40,30 @@ async def create_order(order_data: OrderCreate,
         if not data:
             raise HTTPException(status_code=400, detail="该优惠券不可用或已使用")
 
+        # --- 新增验证开始 ---
+        # 1. 检查优惠券库存
+        if coupon.remaining_quantity <= 0:
+            raise HTTPException(
+                status_code=400,
+                detail="优惠券已被领完，请选择其他优惠"
+            )
+
+        # 2. 检查用户使用限制
+        if coupon.per_user_limit:
+            used_count = await db.execute(
+                select(func.count(UserCoupon.id))
+                .where(
+                    UserCoupon.user_id == user_id,
+                    UserCoupon.coupon_id == coupon.id,
+                    UserCoupon.status == CouponStatus.used
+                )
+            )
+            if (used_count.scalar() or 0) >= coupon.per_user_limit:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"您已超过该优惠券的限用次数（{coupon.per_user_limit}次）"
+                )
+
         user_coupon, coupon = data
         if coupon.min_spend and package.price < coupon.min_spend:
             raise HTTPException(status_code=400, detail="最低消费金额未满足")
@@ -50,6 +74,7 @@ async def create_order(order_data: OrderCreate,
 
             await db.commit()
             raise HTTPException(status_code=400, detail="该优惠券已过期")
+
 
 # 获取店铺信息
         shop = await db.get(Shop, package.shop_id)
