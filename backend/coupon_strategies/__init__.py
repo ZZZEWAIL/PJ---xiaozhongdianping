@@ -30,11 +30,16 @@ class FixedAmountStrategy(BaseCouponStrategy):
     """减至固定金额策略（如免单券、固定价格券）。"""
     
     def apply_discount(self, original_price: float, coupon: Coupon) -> float:
-        # 如果原价低于优惠目标金额，则返回 0（即全免），否则减去该金额。
-        if original_price <= coupon.discount_value:
-            return 0.0
-        else:
-            return original_price - coupon.discount_value
+        # 计算应减金额（原价-目标价）
+        discount_amount = original_price - coupon.discount_value
+    
+        # 应用最大折扣限制
+        if coupon.max_discount is not None:
+            discount_amount = min(discount_amount, coupon.max_discount)
+    
+        # 确保最终价格不低于0
+        final_price = original_price - discount_amount
+        return max(final_price, 0.0)
 
 class DiscountPercentageStrategy(BaseCouponStrategy):
     """按折扣比例进行折扣的策略（如 9 折券）。"""
