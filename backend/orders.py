@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, func
 from datetime import datetime
 from typing import Dict, Any
 from backend.database import get_db
@@ -30,9 +30,11 @@ async def create_order(order_data: OrderCreate,
     if order_data.coupon_id:
         # 查询用户优惠券和对应的券定义
         result = await db.execute(
+            # UserCoupon.id 是唯一的
+            # UserCoupon.coupon_id 可能重复
             select(UserCoupon, Coupon).join(Coupon, UserCoupon.coupon_id == Coupon.id).where(
                 UserCoupon.user_id == user_id,
-                UserCoupon.coupon_id == order_data.coupon_id,
+                UserCoupon.id == order_data.coupon_id,
                 UserCoupon.status == CouponStatus.unused
             )
         )
@@ -44,7 +46,7 @@ async def create_order(order_data: OrderCreate,
 
         # --- 新增验证开始 ---
         # 1. 检查优惠券库存
-        if coupon.remaining_quantity <= 0:
+        if coupon.remaining_quantity and coupon.remaining_quantity <= 0:
             raise HTTPException(
                 status_code=400,
                 detail="优惠券已被领完，请选择其他优惠"
