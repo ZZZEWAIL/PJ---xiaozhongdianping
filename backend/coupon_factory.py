@@ -43,6 +43,8 @@ class CouponFactory:
         # 如果未指定有效期类型，则默认设置为无限期
         if expiry_type is None:
             expiry_type = ExpiryType.unlimited
+            expiry_date = datetime.now() + timedelta(days=365)
+
 
         # 如果设置了总发放量但未设置剩余数量，则默认剩余数量等于总量
         if total_quantity is not None and remaining_quantity is None:
