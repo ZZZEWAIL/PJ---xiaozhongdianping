@@ -40,6 +40,8 @@ async def create_order(order_data: OrderCreate,
         if not data:
             raise HTTPException(status_code=400, detail="该优惠券不可用或已使用")
 
+        user_coupon, coupon = data
+
         # --- 新增验证开始 ---
         # 1. 检查优惠券库存
         if coupon.remaining_quantity <= 0:
@@ -64,7 +66,6 @@ async def create_order(order_data: OrderCreate,
                     detail=f"您已超过该优惠券的限用次数（{coupon.per_user_limit}次）"
                 )
 
-        user_coupon, coupon = data
         if coupon.min_spend and package.price < coupon.min_spend:
             raise HTTPException(status_code=400, detail="最低消费金额未满足")
     
