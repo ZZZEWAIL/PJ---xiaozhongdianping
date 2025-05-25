@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Dict, Any, List, Optional, Literal
 from backend.database import get_db
 from backend.models import (
@@ -249,6 +249,87 @@ async def claim_coupon(
 
     await db.commit()
     return {"message": "优惠券领取成功"}
+
+# ------------------------- 奖励券发放 ------------------------- #
+async def issue_coupon(
+    db: AsyncSession,
+    user_id: int,
+    coupon_type: Literal["invitation", "review"],
+    discount_value: float,
+    max_discount: float | None = None,
+    min_spend: float = 0.0,
+    expiry_days: int = 7
+) -> Dict[str, Any]:
+    """
+    统一发放优惠券逻辑
+    - coupon_type: "invitation" 或 "review"
+    - discount_value: 折扣金额或折扣比例
+    - max_discount: 最大抵扣金额（可选）
+    - min_spend: 使用门槛（默认0）
+    - expiry_days: 有效天数（默认7天）
+    """
+    # 校验用户是否已领取该类型奖励
+    if coupon_type == "invitation":
+        result = await db.execute(
+            select(func.count(UserCoupon.id)).where(
+                UserCoupon.user_id == user_id,
+                UserCoupon.coupon_id.in_(
+                    select(Coupon.id).where(Coupon.name.like("邀请奖励券%"))
+                )
+            )
+        )
+        if result.scalar() > 0:
+            raise HTTPException(status_code=400, detail="您已领取过邀请奖励券")
+    elif coupon_type == "review":
+        result = await db.execute(
+            select(func.count(UserCoupon.id)).where(
+                UserCoupon.user_id == user_id,
+                UserCoupon.coupon_id.in_(
+                    select(Coupon.id).where(Coupon.name.like("点评奖励券%"))
+                )
+            )
+        )
+        if result.scalar() > 0:
+            raise HTTPException(status_code=400, detail="您已领取过点评奖励券")
+
+    # 定义优惠券参数
+    name = f"{coupon_type.capitalize()}奖励券"
+    description = f"无门槛{coupon_type}奖励券"
+    discount_type = DiscountType.FIXED_AMOUNT if max_discount else DiscountType.DISCOUNT
+    expiry_date = datetime.utcnow() + timedelta(days=expiry_days)
+
+    # 创建优惠券
+    coupon = Coupon(
+        name=name,
+        description=description,
+        discount_type=discount_type,
+        discount_value=discount_value,
+        min_spend=min_spend,
+        max_discount=max_discount,
+        expiry_date=expiry_date,
+        total_quantity=1,
+        remaining_quantity=1,
+        per_user_limit=1
+    )
+    db.add(coupon)
+    await db.commit()
+    await db.refresh(coupon)
+
+    # 发放给用户
+    user_coupon = UserCoupon(
+        user_id=user_id,
+        coupon_id=coupon.id,
+        status=CouponStatus.unused,
+        expires_at=expiry_date
+    )
+    db.add(user_coupon)
+    await db.commit()
+
+    return {
+        "message": f"成功发放{coupon_type}奖励券",
+        "coupon_id": user_coupon.id,
+        "expires_at": user_coupon.expires_at
+    }
 
 # ------------------------- 用户卡包（按状态分类） ------------------------- #
 @router.get("/user/coupons", response_model=CouponListResponse)

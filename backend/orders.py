@@ -4,7 +4,7 @@ from sqlalchemy import select, func
 from datetime import datetime
 from typing import Dict, Any
 from backend.database import get_db
-from backend.models import Package, Order, Coupon, UserCoupon, CouponStatus, Shop
+from backend.models import Package, Order, Coupon, UserCoupon, CouponStatus, Shop, User
 from backend.schema import OrderCreate, OrderCreated
 from backend.login import get_current_user
 
@@ -71,7 +71,7 @@ async def create_order(order_data: OrderCreate,
         if coupon.min_spend and package.price < coupon.min_spend:
             raise HTTPException(status_code=400, detail="最低消费金额未满足")
     
-# 检查是否过期
+        # 检查是否过期
         if user_coupon.expires_at and datetime.utcnow() > user_coupon.expires_at:
             user_coupon.status = CouponStatus.expired
 
@@ -79,7 +79,7 @@ async def create_order(order_data: OrderCreate,
             raise HTTPException(status_code=400, detail="该优惠券已过期")
 
 
-# 获取店铺信息
+        # 获取店铺信息
         shop = await db.get(Shop, package.shop_id)
 
         if coupon.shop_restriction and shop and shop.name != coupon.shop_restriction:
@@ -94,6 +94,25 @@ async def create_order(order_data: OrderCreate,
         strategy = get_coupon_strategy(coupon.discount_type)
         final_price = strategy.apply_discount(package.price, coupon)
 
+
+    # 邀请码校验
+    inviter = None
+    if order_data.invitation_code:
+        inviter_result = await db.execute(
+            select(User).where(User.invitation_code == order_data.invitation_code)
+        )
+        inviter = inviter_result.scalar()
+        if not inviter or inviter.id == user_id:
+            raise HTTPException(status_code=400, detail="无效的邀请码")
+        order_count = await db.execute(
+            select(func.count()).where(Order.user_id == user_id)
+        )
+        if order_count.scalar() > 0:
+            raise HTTPException(status_code=400, detail="仅首次下单可使用邀请码")
+        if final_price <= 10:
+            raise HTTPException(status_code=400, detail="订单金额需超过10元")
+
+
     # 生成16位数字券码，确保唯一（此处略去数据库唯一性检测逻辑）
     import random, string
     voucher_code = ''.join(random.choices(string.digits, k=16))
@@ -104,11 +123,21 @@ async def create_order(order_data: OrderCreate,
         package_id=package.id,
         voucher_code=voucher_code,
         coupon_id=order_data.coupon_id or None,
-        order_amount=final_price
+        order_amount=final_price,
+        invitation_code=order_data.invitation_code
     )
     db.add(new_order)
     await db.commit()
     await db.refresh(new_order)
+
+    # 邀请记录（在订单创建后调用）
+    if order_data.invitation_code and inviter:
+        from backend.invitation import record_invitation
+        try:
+            await record_invitation(db, order=new_order, inviter_id=inviter.id, invited_user_id=user_id)
+        except Exception as e:
+            # 记录日志，但不影响订单创建
+            print(f"Failed to record invitation: {str(e)}")
 
     # 使用观察者模式通知其他模块（如：更新销量、标记优惠券已使用）
     from backend.order_observers import notify_order_created

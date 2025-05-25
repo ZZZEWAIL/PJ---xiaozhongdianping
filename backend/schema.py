@@ -61,6 +61,7 @@ class OrderCreate(BaseModel):
     """
     package_id: int
     coupon_id: int | None = None  # 可选：使用的优惠券
+    invitation_code: str | None = None  # 新增
 
 
 class OrderCreated(BaseModel):
