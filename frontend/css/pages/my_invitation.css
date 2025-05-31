@@ -1,0 +1,384 @@
+/**
+ * 我的邀请页面样式
+ * 包含邀请码展示、进度条、记录列表等组件样式
+ */
+
+/* 邀请码卡片样式 */
+.invitation-code-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.25);
+    overflow: hidden;
+}
+
+.invitation-code-card .card-header {
+    background: rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+.invitation-code-card .card-body {
+    background: transparent;
+    color: white;
+}
+
+/* 邀请码显示区域 */
+.invitation-code-display {
+    padding: 20px 0;
+}
+
+.code-label {
+    font-size: 1rem;
+    margin-bottom: 15px;
+    opacity: 0.9;
+}
+
+.invitation-code {
+    margin: 20px 0;
+}
+
+.code-text {
+    font-size: 2.5rem;
+    font-weight: bold;
+    letter-spacing: 8px;
+    color: #fff;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    padding: 15px 30px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    display: inline-block;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+}
+
+.code-text:hover {
+    transform: scale(1.05);
+    background: rgba(255, 255, 255, 0.2);
+}
+
+#copy-code-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    color: white;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+}
+
+#copy-code-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.6);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.invitation-rules {
+    margin-top: 20px;
+    opacity: 0.8;
+}
+
+/* 邀请进度卡片 */
+.invitation-progress-card {
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.invitation-progress-card .card-header {
+    background: linear-gradient(45deg, #28a745, #20c997);
+    color: white;
+    border-radius: 12px 12px 0 0;
+}
+
+.progress-info {
+    font-size: 1.1rem;
+}
+
+.progress-bar-container {
+    margin: 15px 0;
+}
+
+.progress {
+    border-radius: 10px;
+    background-color: #e9ecef;
+}
+
+.progress-bar {
+    border-radius: 10px;
+    transition: width 0.6s ease;
+}
+
+.progress-labels {
+    font-size: 0.85rem;
+}
+
+/* 邀请记录和奖励券卡片 */
+.invitation-records-card,
+.rewards-card {
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.invitation-records-card .card-header {
+    background: linear-gradient(45deg, #6f42c1, #e83e8c);
+    color: white;
+    border-radius: 12px 12px 0 0;
+}
+
+.rewards-card .card-header {
+    background: linear-gradient(45deg, #fd7e14, #ffc107);
+    color: white;
+    border-radius: 12px 12px 0 0;
+}
+
+/* 邀请记录项目样式 */
+.invitation-record-item {
+    padding: 15px;
+    border-bottom: 1px solid #e9ecef;
+    transition: all 0.3s ease;
+}
+
+.invitation-record-item:last-child {
+    border-bottom: none;
+}
+
+.invitation-record-item:hover {
+    background-color: #f8f9fa;
+    transform: translateX(5px);
+}
+
+.record-user .user-name {
+    font-weight: 500;
+    color: #495057;
+    font-size: 1.1rem;
+}
+
+.record-details .order-amount {
+    font-size: 1.2rem;
+}
+
+/* 奖励券项目样式 */
+.reward-coupon-item {
+    padding: 15px;
+    border-bottom: 1px solid #e9ecef;
+    transition: all 0.3s ease;
+}
+
+.reward-coupon-item:last-child {
+    border-bottom: none;
+}
+
+.reward-coupon-item:hover {
+    background-color: #f8f9fa;
+    transform: translateX(5px);
+}
+
+.coupon-info .coupon-name {
+    font-size: 1.1rem;
+    color: #495057;
+}
+
+.coupon-value {
+    text-align: center;
+}
+
+.value-display {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #28a745;
+    margin-bottom: 8px;
+}
+
+.status-badge {
+    font-size: 0.8rem;
+}
+
+/* 空状态样式 */
+.text-center i[style*="font-size: 3rem"] {
+    opacity: 0.3;
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+/* 加载状态动画 */
+.spinner-border {
+    animation: spinner-border 0.75s linear infinite;
+}
+
+/* Toast容器样式 */
+.toast-container {
+    z-index: 1050;
+}
+
+.toast {
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .container {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+    
+    .code-text {
+        font-size: 1.8rem;
+        letter-spacing: 4px;
+        padding: 10px 20px;
+    }
+    
+    .invitation-code-display {
+        padding: 15px 0;
+    }
+    
+    .invitation-record-item,
+    .reward-coupon-item {
+        padding: 12px;
+    }
+    
+    .record-details,
+    .coupon-value {
+        text-align: left;
+        margin-top: 8px;
+    }
+    
+    .d-flex.justify-content-between {
+        flex-direction: column;
+        align-items: flex-start !important;
+    }
+    
+    .value-display {
+        font-size: 1.2rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .card-header h3 {
+        font-size: 1.1rem;
+    }
+    
+    .progress-info {
+        font-size: 1rem;
+    }
+    
+    .progress-info .d-flex {
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    .code-text {
+        font-size: 1.5rem;
+        letter-spacing: 2px;
+    }
+    
+    .invitation-code-card .card-body {
+        padding: 15px;
+    }
+}
+
+/* 深色模式适配（预留） */
+@media (prefers-color-scheme: dark) {
+    .card {
+        background-color: #2d3748;
+        color: #e2e8f0;
+    }
+    
+    .invitation-record-item:hover,
+    .reward-coupon-item:hover {
+        background-color: #4a5568;
+    }
+    
+    .text-muted {
+        color: #a0aec0 !important;
+    }
+}
+
+/* 动画效果 */
+.card {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.card:nth-child(2) {
+    animation-delay: 0.1s;
+}
+
+.card:nth-child(3) {
+    animation-delay: 0.2s;
+}
+
+.card:nth-child(4) {
+    animation-delay: 0.3s;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 复制按钮动画 */
+#copy-code-btn.copied {
+    animation: pulse 0.6s ease-in-out;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* 进度条动画 */
+.progress-bar {
+    background: linear-gradient(45deg, #28a745, #20c997, #17a2b8);
+    background-size: 200% 200%;
+    animation: gradient 2s ease infinite;
+}
+
+@keyframes gradient {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+/* 卡片悬停效果 */
+.card {
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.invitation-code-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 35px rgba(102, 126, 234, 0.3);
+} 
