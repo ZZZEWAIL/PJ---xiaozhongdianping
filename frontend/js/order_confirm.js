@@ -13,6 +13,8 @@ let packageData = null;
 let availableCoupons = [];
 let selectedCoupon = null;
 let bestCoupon = null;
+let invitationCode = ''; // 邀请码
+let isInvitationValid = false; // 邀请码是否有效
 
 // 页面加载完成后执行
 document.addEventListener('DOMContentLoaded', () => {
@@ -411,6 +413,9 @@ function bindEvents() {
         updateOrderAmount();
     });
 
+    // 邀请码相关事件绑定
+    bindInvitationEvents();
+
     // 取消按钮
     document.getElementById('cancel-btn').addEventListener('click', () => {
         window.history.back();
@@ -426,12 +431,199 @@ function bindEvents() {
 }
 
 /**
+ * 绑定邀请码相关事件
+ */
+function bindInvitationEvents() {
+    const invitationInput = document.getElementById('invitation-code-input');
+    const clearBtn = document.getElementById('clear-invitation-btn');
+    const useInvitationCheckbox = document.getElementById('use-invitation');
+
+    // 邀请码输入框事件
+    if (invitationInput) {
+        // 输入时实时验证
+        invitationInput.addEventListener('input', handleInvitationInput);
+        
+        // 失去焦点时验证
+        invitationInput.addEventListener('blur', validateInvitationCode);
+    }
+
+    // 清除按钮
+    if (clearBtn) {
+        clearBtn.addEventListener('click', clearInvitationCode);
+    }
+
+    // 使用邀请码开关
+    if (useInvitationCheckbox) {
+        useInvitationCheckbox.addEventListener('change', handleInvitationToggle);
+    }
+}
+
+/**
+ * 处理邀请码输入
+ * @param {Event} event - 输入事件
+ */
+function handleInvitationInput(event) {
+    const input = event.target;
+    let value = input.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    
+    // 限制长度为6位
+    if (value.length > 6) {
+        value = value.substring(0, 6);
+    }
+    
+    input.value = value;
+    invitationCode = value;
+    
+    // 清除之前的验证状态
+    clearInvitationStatus();
+    
+    // 如果输入完整6位，自动验证
+    if (value.length === 6) {
+        validateInvitationCode();
+    } else if (value.length === 0) {
+        isInvitationValid = false;
+    }
+}
+
+/**
+ * 验证邀请码
+ */
+async function validateInvitationCode() {
+    const invitationInput = document.getElementById('invitation-code-input');
+    const code = invitationInput.value.trim();
+    
+    if (!code || code.length !== 6) {
+        clearInvitationStatus();
+        isInvitationValid = false;
+        return;
+    }
+
+    try {
+        showInvitationLoading();
+        
+        // Mock验证 - 在实际项目中这里会调用后端API
+        await mockValidateInvitationCode(code);
+        
+    } catch (error) {
+        console.error('邀请码验证失败:', error);
+        showInvitationError(error.message || '邀请码验证失败');
+        isInvitationValid = false;
+    }
+}
+
+/**
+ * Mock邀请码验证（模拟后端验证）
+ * @param {string} code - 邀请码
+ */
+async function mockValidateInvitationCode(code) {
+    // 模拟网络延迟
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    // 模拟验证逻辑
+    if (code === 'SELF01') {
+        throw new Error('不能使用自己的邀请码');
+    } else if (code === 'USED01') {
+        throw new Error('您已使用过邀请码，每个用户只能使用一次');
+    } else if (code === 'INVALID') {
+        throw new Error('邀请码不存在或已失效');
+    } else if (['ABC123', 'DEF456', 'GHI789'].includes(code)) {
+        // 模拟有效邀请码
+        showInvitationSuccess();
+        isInvitationValid = true;
+    } else {
+        throw new Error('邀请码格式错误或不存在');
+    }
+}
+
+/**
+ * 显示邀请码验证中状态
+ */
+function showInvitationLoading() {
+    const statusDiv = document.getElementById('invitation-status');
+    statusDiv.className = 'd-flex align-items-center text-info';
+    statusDiv.innerHTML = `
+        <div class="spinner-border spinner-border-sm me-2" role="status">
+            <span class="visually-hidden">验证中...</span>
+        </div>
+        <small>正在验证邀请码...</small>
+    `;
+}
+
+/**
+ * 显示邀请码验证成功状态
+ */
+function showInvitationSuccess() {
+    const statusDiv = document.getElementById('invitation-status');
+    statusDiv.className = 'd-flex align-items-center text-success';
+    statusDiv.innerHTML = `
+        <i class="bi bi-check-circle-fill me-2"></i>
+        <small>邀请码验证成功！使用此邀请码下单，邀请人可获得奖励</small>
+    `;
+}
+
+/**
+ * 显示邀请码验证错误状态
+ * @param {string} message - 错误信息
+ */
+function showInvitationError(message) {
+    const statusDiv = document.getElementById('invitation-status');
+    statusDiv.className = 'd-flex align-items-center text-danger';
+    statusDiv.innerHTML = `
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <small>${escapeHtml(message)}</small>
+    `;
+}
+
+/**
+ * 清除邀请码验证状态
+ */
+function clearInvitationStatus() {
+    const statusDiv = document.getElementById('invitation-status');
+    statusDiv.className = 'd-none';
+    statusDiv.innerHTML = '';
+}
+
+/**
+ * 清除邀请码输入
+ */
+function clearInvitationCode() {
+    const invitationInput = document.getElementById('invitation-code-input');
+    invitationInput.value = '';
+    invitationCode = '';
+    isInvitationValid = false;
+    clearInvitationStatus();
+}
+
+/**
+ * 处理邀请码开关切换
+ * @param {Event} event - 切换事件
+ */
+function handleInvitationToggle(event) {
+    const isChecked = event.target.checked;
+    const container = document.getElementById('invitation-input-container');
+    
+    if (!isChecked) {
+        // 如果关闭邀请码功能，清除状态
+        clearInvitationCode();
+    }
+}
+
+/**
  * 提交订单
  */
 async function submitOrder() {
     if (!packageData) {
         showError('订单信息不完整，请刷新页面重试');
         return;
+    }
+
+    // 验证邀请码（如果启用）
+    const useInvitation = document.getElementById('use-invitation').checked;
+    if (useInvitation && invitationCode) {
+        if (!isInvitationValid) {
+            showError('请先验证邀请码或取消使用邀请码');
+            return;
+        }
     }
 
     try {
@@ -446,12 +638,18 @@ async function submitOrder() {
             coupon_id: selectedCoupon && document.getElementById('use-coupon').checked ? selectedCoupon.id : null
         };
 
+        // 添加邀请码（如果有效且启用）
+        if (useInvitation && isInvitationValid && invitationCode) {
+            orderData.invitation_code = invitationCode;
+        }
+
         // 发送订单请求
         const response = await fetch(`${API_BASE}/orders`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
+            credentials: 'include',
             body: JSON.stringify(orderData)
         });
 
@@ -467,14 +665,28 @@ async function submitOrder() {
         successModal.show();
 
         // 更新成功模态框中的订单信息
-        document.querySelector('#successModal .modal-body').innerHTML = `
+        const modalBody = document.querySelector('#successModal .modal-body');
+        let successContent = `
             <i class="bi bi-check-circle-fill text-success success-icon"></i>
             <p class="mt-3">订单已成功支付！</p>
             <p>订单号：${orderResult.id}</p>
             <p>券码：${orderResult.voucher_code}</p>
             <p>实付金额：¥${orderResult.order_amount.toFixed(2)}</p>
-            <p>您可以在"我的订单"中查看订单详情</p>
         `;
+
+        // 如果使用了邀请码，显示相关信息
+        if (useInvitation && isInvitationValid && invitationCode) {
+            successContent += `
+                <p class="text-success">
+                    <i class="bi bi-gift me-1"></i>
+                    已使用邀请码：${invitationCode}
+                </p>
+            `;
+        }
+
+        successContent += '<p>您可以在"我的订单"中查看订单详情</p>';
+        modalBody.innerHTML = successContent;
+
     } catch (err) {
         console.error('提交订单失败:', err);
         showError(err.message || '订单提交失败，请稍后重试');
@@ -484,6 +696,19 @@ async function submitOrder() {
         confirmBtn.disabled = false;
         confirmBtn.innerHTML = '<i class="bi bi-check-circle me-1"></i> 确认支付';
     }
+}
+
+/**
+ * HTML转义函数，防止XSS攻击
+ * @param {string} text - 需要转义的文本
+ * @returns {string} 转义后的文本
+ */
+function escapeHtml(text) {
+    if (typeof text !== 'string') return '';
+    
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }
 
 /**
