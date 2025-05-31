@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>写点评 · 小众点评</title>
+    
+    <!-- Authentication check -->
+    <script>
+        fetch('/auth/status', { credentials: 'include' })
+            .then(res => {
+                if (!res.ok) {
+                    location.href = 'login.html';
+                    return Promise.reject('Not authenticated');
+                }
+                return res.json();
+            })
+            .then(data => {
+                console.log('User authenticated:', data.username);
+            })
+            .catch(error => {
+                if (error !== 'Not authenticated') {
+                    console.error('Auth check failed:', error);
+                    location.href = 'login.html';
+                }
+            });
+    </script>
+    
+    <!-- Bootstrap CSS + Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Piedra&family=Dancing+Script&display=swap" rel="stylesheet" />
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="./css/style.css" />
+    <link rel="stylesheet" href="./css/base.css" />
+    <link rel="stylesheet" href="./css/components.css" />
+    <link rel="stylesheet" href="./css/pages/write_review.css" />
+</head>
+
+<body>
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="#">
+                <i class="bi bi-shop me-2"></i> 小众点评
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu" aria-controls="navMenu" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div id="navMenu" class="collapse navbar-collapse">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">首页</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="search.html">附近商家</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="my_orders.html">我的订单</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="my_coupons.html">我的卡包</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="my_invitation.html">我的邀请</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <div class="container mt-4">
+        <!-- 页面头部 -->
+        <div class="text-center mb-4">
+            <h2 class="mb-3">
+                <i class="bi bi-pencil-square me-2 text-primary"></i>
+                写点评
+            </h2>
+            <p class="text-muted">分享您的用餐体验，帮助其他用户做出更好的选择</p>
+        </div>
+
+        <!-- 商家信息卡片 -->
+        <div class="card shop-info-card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-shop me-2"></i>正在点评的商家
+                </h5>
+            </div>
+            <div class="card-body">
+                <div id="shop-info">
+                    <div class="d-flex justify-content-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">加载中...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 点评表单 -->
+        <div class="card review-form-card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-chat-left-text me-2"></i>您的点评
+                </h5>
+            </div>
+            <div class="card-body">
+                <form id="review-form">
+                    <!-- 点评内容 -->
+                    <div class="mb-4">
+                        <label for="review-content" class="form-label">
+                            <i class="bi bi-card-text me-1"></i>
+                            点评内容 <span class="text-danger">*</span>
+                        </label>
+                        <textarea class="form-control" 
+                                  id="review-content" 
+                                  rows="6" 
+                                  placeholder="请描述您的用餐体验，包括菜品口味、服务质量、环境等方面...&#10;&#10;提示：详细的点评更能帮助其他用户，写满15字即可提交"
+                                  maxlength="500"></textarea>
+                        
+                        <!-- 字符计数器 -->
+                        <div class="form-text d-flex justify-content-between">
+                            <div class="character-status">
+                                <span id="char-count">0</span>
+                                <span class="text-muted">/15 最少字符</span>
+                                <span class="min-indicator ms-2">
+                                    <i class="bi bi-exclamation-circle text-warning"></i>
+                                    <span class="status-text">还需输入15字</span>
+                                </span>
+                            </div>
+                            <div class="max-indicator">
+                                <span class="text-muted">最多500字</span>
+                            </div>
+                        </div>
+                        
+                        <!-- 提示信息 -->
+                        <div class="review-tips mt-3">
+                            <div class="alert alert-info">
+                                <h6 class="alert-heading">
+                                    <i class="bi bi-lightbulb me-1"></i>写点评小贴士
+                                </h6>
+                                <ul class="mb-0">
+                                    <li>点评内容不少于15个字才能提交</li>
+                                    <li>写满3条15字以上的点评，可获得8折优惠券奖励（最高抵扣20元）</li>
+                                    <li>详细的点评更能帮助其他用户，也更容易获得回复和点赞</li>
+                                    <li>请客观真实地描述您的体验</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 提交按钮 -->
+                    <div class="form-actions">
+                        <div class="d-flex gap-3">
+                            <button type="button" class="btn btn-outline-secondary" id="cancel-btn">
+                                <i class="bi bi-x-circle me-1"></i>取消
+                            </button>
+                            <button type="submit" class="btn btn-primary" id="submit-btn" disabled>
+                                <i class="bi bi-send me-1"></i>发布点评
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- 我的点评历史 -->
+        <div class="card my-reviews-card mt-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-clock-history me-2"></i>我的点评记录
+                </h5>
+                <span id="my-review-count" class="badge bg-secondary">0 条点评</span>
+            </div>
+            <div class="card-body">
+                <div id="my-reviews-list">
+                    <div class="text-center py-3">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">加载中...</span>
+                        </div>
+                        <div class="mt-2">正在加载您的点评记录...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 提交成功模态框 -->
+    <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="successModalLabel">
+                        <i class="bi bi-check-circle-fill text-success me-2"></i>
+                        点评发布成功
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <div id="success-content">
+                        <!-- 成功信息将动态填充 -->
+                    </div>
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn btn-primary" id="view-shop-btn">查看商家详情</button>
+                    <button type="button" class="btn btn-outline-secondary" id="continue-review-btn" data-bs-dismiss="modal">继续写点评</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Page JS -->
+    <script src="./js/write_review.js"></script>
+</body>
+
+</html> 

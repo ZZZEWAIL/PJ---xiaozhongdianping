@@ -28,6 +28,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
     <link rel="stylesheet" href="./css/pages/shops_detail.css">
+    <link rel="stylesheet" href="./css/components/reviews.css">
 </head>
 
 <body>
@@ -55,6 +56,9 @@
                     <li class="nav-item">
                         <a class="nav-link" href="my_coupons.html">我的卡包</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="my_invitation.html">我的邀请</a>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -77,6 +81,47 @@
                         <span class="visually-hidden">加载中...</span>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- 点评区域 -->
+        <div id="shop-reviews" class="mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3 class="mb-0">
+                    <i class="bi bi-chat-left-text me-2"></i>用户点评
+                    <span id="review-count" class="badge bg-secondary ms-2">0</span>
+                </h3>
+                <button id="write-review-btn" class="btn btn-primary">
+                    <i class="bi bi-pencil me-1"></i>写点评
+                </button>
+            </div>
+            
+            <!-- 点评排序选项 -->
+            <div class="review-controls mb-3">
+                <div class="btn-group" role="group" aria-label="点评排序">
+                    <input type="radio" class="btn-check" name="review-sort" id="sort-newest" value="newest" checked>
+                    <label class="btn btn-outline-secondary" for="sort-newest">最新</label>
+                    
+                    <input type="radio" class="btn-check" name="review-sort" id="sort-oldest" value="oldest">
+                    <label class="btn btn-outline-secondary" for="sort-oldest">最早</label>
+                </div>
+            </div>
+            
+            <!-- 点评列表容器 -->
+            <div id="reviews-container">
+                <div class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">加载中...</span>
+                    </div>
+                    <div class="mt-2">正在加载点评...</div>
+                </div>
+            </div>
+            
+            <!-- 加载更多按钮 -->
+            <div class="text-center mt-3">
+                <button id="load-more-reviews" class="btn btn-outline-primary" style="display: none;">
+                    <i class="bi bi-arrow-down-circle me-1"></i>加载更多点评
+                </button>
             </div>
         </div>
 
@@ -104,6 +149,35 @@
         <a href="search.html" class="btn btn-outline-primary mt-4 d-block mx-auto" style="max-width: 200px;">
             <i class="bi bi-arrow-left me-1"></i> 返回搜索页面
         </a>
+    </div>
+
+    <!-- 回复模态框 -->
+    <div class="modal fade" id="replyModal" tabindex="-1" aria-labelledby="replyModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="replyModalLabel">回复评论</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="reply-target-info" class="mb-3">
+                        <!-- 回复目标信息 -->
+                    </div>
+                    <div class="mb-3">
+                        <label for="reply-content" class="form-label">回复内容</label>
+                        <textarea class="form-control" id="reply-content" rows="3" 
+                                  placeholder="请输入回复内容，至少15个字"></textarea>
+                        <div class="form-text">
+                            <span id="reply-char-count">0</span>/15 字符
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" id="submit-reply-btn">发布回复</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

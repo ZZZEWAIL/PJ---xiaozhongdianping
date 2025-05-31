@@ -1,0 +1,473 @@
+/**
+ * 写点评页面样式
+ * 
+ * @author Frontend Team
+ * @version 1.0
+ */
+
+/* =========================== 页面容器 =========================== */
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px 15px;
+}
+
+/* =========================== 卡片样式 =========================== */
+
+.shop-info-card,
+.review-form-card,
+.my-reviews-card {
+    border: none;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border-radius: 16px;
+    margin-bottom: 2rem;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.shop-info-card:hover,
+.review-form-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+.card-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 1.5rem 2rem;
+    font-weight: 600;
+}
+
+.card-header h5 {
+    margin: 0;
+    font-size: 1.1rem;
+    letter-spacing: 0.5px;
+}
+
+.card-body {
+    padding: 2rem;
+}
+
+/* =========================== 商家信息样式 =========================== */
+
+.shop-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.shop-details h5 {
+    color: #2c3e50;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.shop-meta .badge {
+    font-size: 0.85rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 20px;
+}
+
+.shop-description {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-left: 4px solid #667eea;
+}
+
+/* =========================== 表单样式 =========================== */
+
+.form-label {
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 0.75rem;
+    font-size: 1rem;
+}
+
+.form-control {
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    padding: 1rem;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    resize: vertical;
+    min-height: 150px;
+}
+
+.form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.15);
+    outline: none;
+}
+
+.form-control::placeholder {
+    color: #95a5a6;
+    font-style: italic;
+}
+
+/* =========================== 字符计数器 =========================== */
+
+.character-status {
+    display: flex;
+    align-items: center;
+    font-weight: 500;
+}
+
+#char-count {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #667eea;
+}
+
+.min-indicator {
+    display: flex;
+    align-items: center;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.min-indicator.text-warning {
+    color: #f39c12 !important;
+}
+
+.min-indicator.text-success {
+    color: #27ae60 !important;
+}
+
+.status-text {
+    margin-left: 0.25rem;
+}
+
+.max-indicator {
+    color: #95a5a6;
+    font-size: 0.9rem;
+}
+
+/* =========================== 提示信息 =========================== */
+
+.review-tips .alert {
+    background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+    border: none;
+    border-radius: 12px;
+    border-left: 4px solid #667eea;
+}
+
+.review-tips .alert-heading {
+    color: #2c3e50;
+    font-size: 1rem;
+    margin-bottom: 0.75rem;
+}
+
+.review-tips ul {
+    margin-bottom: 0;
+    padding-left: 1.25rem;
+}
+
+.review-tips li {
+    margin-bottom: 0.5rem;
+    color: #5a6c7d;
+    line-height: 1.6;
+}
+
+/* =========================== 按钮样式 =========================== */
+
+.form-actions {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #eee;
+}
+
+.btn {
+    border-radius: 25px;
+    padding: 0.75rem 2rem;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    border: none;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.btn:hover:before {
+    left: 100%;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.btn-secondary {
+    background: #95a5a6;
+    color: white;
+}
+
+.btn-outline-secondary {
+    border: 2px solid #95a5a6;
+    color: #95a5a6;
+    background: transparent;
+}
+
+.btn-outline-secondary:hover {
+    background: #95a5a6;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* =========================== 点评历史 =========================== */
+
+.review-history-item {
+    transition: all 0.3s ease;
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    border: 1px solid #e9ecef !important;
+}
+
+.review-history-item:hover {
+    transform: translateX(5px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    border-color: #667eea !important;
+}
+
+.review-history-item .badge {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    padding: 0.4rem 0.8rem;
+}
+
+.review-content p {
+    color: #2c3e50;
+    line-height: 1.6;
+    margin: 0;
+}
+
+.review-meta {
+    color: #95a5a6;
+    font-size: 0.9rem;
+}
+
+/* =========================== 成功模态框 =========================== */
+
+.modal-content {
+    border: none;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 20px 20px 0 0;
+    padding: 1.5rem 2rem;
+}
+
+.modal-body {
+    padding: 2rem;
+}
+
+.modal-footer {
+    border: none;
+    padding: 1rem 2rem 2rem;
+}
+
+/* =========================== 空状态样式 =========================== */
+
+.text-center i[style*="font-size: 3rem"] {
+    opacity: 0.3;
+    margin-bottom: 1rem;
+}
+
+/* =========================== 响应式设计 =========================== */
+
+@media (max-width: 768px) {
+    .container {
+        padding: 15px 10px;
+    }
+    
+    .card-body {
+        padding: 1.5rem;
+    }
+    
+    .card-header {
+        padding: 1rem 1.5rem;
+    }
+    
+    .shop-details h5 {
+        font-size: 1.1rem;
+    }
+    
+    .form-control {
+        padding: 0.875rem;
+        font-size: 0.95rem;
+    }
+    
+    .btn {
+        padding: 0.625rem 1.5rem;
+        font-size: 0.95rem;
+    }
+    
+    .form-actions .d-flex {
+        flex-direction: column;
+    }
+    
+    .form-actions .btn {
+        margin-bottom: 0.75rem;
+        width: 100%;
+    }
+    
+    .form-actions .btn:last-child {
+        margin-bottom: 0;
+    }
+    
+    .character-status {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .min-indicator {
+        margin-left: 0 !important;
+    }
+}
+
+@media (max-width: 576px) {
+    .shop-avatar {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .shop-details h5 {
+        font-size: 1rem;
+    }
+    
+    .shop-meta {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .review-tips .alert-heading {
+        font-size: 0.95rem;
+    }
+    
+    .review-tips li {
+        font-size: 0.9rem;
+    }
+}
+
+/* =========================== 动画效果 =========================== */
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.shop-info-card,
+.review-form-card,
+.my-reviews-card {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.shop-info-card {
+    animation-delay: 0.1s;
+}
+
+.review-form-card {
+    animation-delay: 0.2s;
+}
+
+.my-reviews-card {
+    animation-delay: 0.3s;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+.btn-primary:focus {
+    animation: pulse 0.5s ease-in-out;
+}
+
+/* =========================== 加载状态 =========================== */
+
+.spinner-border-sm {
+    width: 1rem;
+    height: 1rem;
+}
+
+/* =========================== 暗色主题适配 =========================== */
+
+@media (prefers-color-scheme: dark) {
+    .shop-info-card,
+    .review-form-card,
+    .my-reviews-card {
+        background-color: #2d3748;
+        color: #e2e8f0;
+    }
+    
+    .shop-details h5 {
+        color: #e2e8f0;
+    }
+    
+    .form-control {
+        background-color: #4a5568;
+        border-color: #718096;
+        color: #e2e8f0;
+    }
+    
+    .form-control::placeholder {
+        color: #a0aec0;
+    }
+    
+    .review-history-item {
+        background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+        border-color: #718096 !important;
+        color: #e2e8f0;
+    }
+    
+    .review-content p {
+        color: #e2e8f0;
+    }
+} 
