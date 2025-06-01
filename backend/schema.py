@@ -4,6 +4,7 @@ from datetime import datetime
 from enum import Enum
 from backend.models import DiscountType, ExpiryType, CouponStatus
 
+
 class LoginForm(BaseModel):
     username: str
     password: str
@@ -151,3 +152,55 @@ class UserStatus(BaseModel):
     """
     id: int
     username: str
+
+# ---------- review创建请求模型 ----------
+
+class ReviewCreate(BaseModel):
+    """
+    创建点评时使用
+    """
+    content: str
+
+
+class ReviewReplyCreate(BaseModel):
+    """
+    创建回复时使用
+    """
+    content: str
+    parent_reply_id: Optional[int] = None
+
+
+# ---------- review响应模型 ----------
+
+class ReviewReplyResponse(BaseModel):
+    """
+    回复返回结构（支持递归嵌套）
+    """
+    id: int
+    review_id: int
+    user_id: int
+    content: str
+    created_at: datetime
+    parent_reply_id: Optional[int] = None
+    replies: List["ReviewReplyResponse"] = []  # 子回复列表
+
+    class Config:
+        orm_mode = True
+
+
+ReviewReplyResponse.update_forward_refs()  # 处理自引用
+
+
+class ReviewResponse(BaseModel):
+    """
+    点评返回结构
+    """
+    id: int
+    user_id: int
+    shop_id: int
+    content: str
+    created_at: datetime
+    replies: List[ReviewReplyResponse] = []  # 根级回复列表
+
+    class Config:
+        orm_mode = True
