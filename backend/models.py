@@ -3,6 +3,7 @@ from sqlalchemy.ext.declarative import declarative_base
 import datetime
 import enum
 
+
 Base = declarative_base()
 
 # 枚举类型定义
@@ -115,3 +116,44 @@ class InvitationRecord(Base):
     amount = Column(Float, nullable=False)
     order_time = Column(DateTime, nullable=False)
     is_valid = Column(Boolean, default=True)
+
+#review相关模型
+class Review(Base):
+    """
+    点评模型
+    """
+    __tablename__ = "reviews"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)   # 点评人
+    shop_id = Column(Integer, ForeignKey("shops.id"), nullable=False)   # 被点评商户
+    content = Column(String, nullable=False)                            # 点评内容
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+    # 一对多：一个点评可拥有多条回复
+    replies = relationship(
+        "ReviewReply",
+        back_populates="review",
+        cascade="all, delete-orphan",
+    )
+
+
+class ReviewReply(Base):
+    """
+    回复模型（支持无限嵌套）
+    """
+    __tablename__ = "review_replies"
+
+    id = Column(Integer, primary_key=True, index=True)
+    review_id = Column(Integer, ForeignKey("reviews.id"), nullable=False)      # 所属点评
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)          # 回复人
+    content = Column(String, nullable=False)                                   # 回复内容
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    parent_reply_id = Column(Integer, ForeignKey("review_replies.id"))         # 父回复，可为空
+
+    # 关联：所属点评
+    review = relationship("Review", back_populates="replies")
+    # 关联：父回复（自关联）
+    parent_reply = relationship("ReviewReply", remote_side=[id])
+    # 关联：子回复列表（自关联）
+    replies = relationship("ReviewReply")
