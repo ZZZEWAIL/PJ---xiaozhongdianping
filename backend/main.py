@@ -8,6 +8,7 @@ from backend.shops import router as shops_router
 from backend.filter_sort import router as filter_sort_router
 from backend.orders import router as orders_router
 from backend.coupons import router as coupons_router
+from backend.review import router as review_router
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
@@ -28,6 +29,8 @@ app.include_router(shops_router, prefix="/api", tags=["shops"])
 app.include_router(filter_sort_router, prefix="/api", tags=["filter_sort"])
 app.include_router(orders_router,   prefix="/api",  tags=["orders"])
 app.include_router(coupons_router,  prefix="/api",  tags=["coupons"])
+app.include_router(review_router,  prefix="/api",  tags=["reviews"])
+
 
 from fastapi.staticfiles import StaticFiles
 app.mount("/", StaticFiles(directory="frontend"), name="static")
