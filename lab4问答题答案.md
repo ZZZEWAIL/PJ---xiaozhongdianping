@@ -55,9 +55,10 @@
 ### 设计说明
 根据Lab4需求，设计包含点评功能、邀请机制、优惠券发放、订单结算四个模块的类图，体现模块间的依赖关系和业务逻辑。
 
+### 3.1 核心实体模型
+
 ```mermaid
 classDiagram
-    %% 用户和商家基础类
     class User {
         +int id
         +String username
@@ -90,7 +91,6 @@ classDiagram
         +int sales
     }
 
-    %% 订单结算模块
     class Order {
         +int id
         +int userId
@@ -106,15 +106,29 @@ classDiagram
         +applyCoupon()
     }
 
-    class OrderService {
-        +createOrder(OrderRequest)
-        +validateInvitationCode(String)
-        +calculateOrderAmount(Order)
-        +processInvitationReward(Order)
-        +generateVoucherCode()
+    class Review {
+        +int id
+        +int userId
+        +int shopId
+        +String content
+        +Date createdAt
+        +List~Reply~ replies
+        +int getCharacterCount()
+        +boolean isValidReview()
     }
 
-    %% 优惠券发放模块
+    %% 基础关系
+    User "1" *-- "0..*" Order : "places"
+    Shop "1" *-- "0..*" Package : "offers"
+    Package "1" *-- "0..*" Order : "ordered"
+    User "1" *-- "0..*" Review : "writes"
+    Shop "1" *-- "0..*" Review : "receives"
+```
+
+### 3.2 优惠券系统模块
+
+```mermaid
+classDiagram
     class Coupon {
         +int id
         +String name
@@ -144,7 +158,36 @@ classDiagram
         +String reason
     }
 
-    %% 邀请机制模块
+    class CouponType {
+        <<enumeration>>
+        DISCOUNT_RATE
+        FIXED_AMOUNT
+        NO_THRESHOLD
+    }
+
+    class CouponStatus {
+        <<enumeration>>
+        AVAILABLE
+        USED
+        EXPIRED
+    }
+
+    class RewardType {
+        <<enumeration>>
+        REVIEW_REWARD
+        INVITATION_REWARD
+    }
+
+    %% 关系
+    Coupon "1" o-- "0..*" CouponService : "managed by"
+    RewardCoupon "1" o-- "0..*" Coupon : "references"
+    RewardCoupon "1" o-- "0..*" CouponService : "issued by"
+```
+
+### 3.3 邀请机制模块
+
+```mermaid
+classDiagram
     class InvitationService {
         +String getUserInvitationCode(int userId)
         +List~InvitationRecord~ getInvitationRecords(int userId)
@@ -164,7 +207,29 @@ classDiagram
         +boolean rewardIssued
     }
 
-    %% 点评功能模块
+    class User {
+        +int id
+        +String invitationCode
+        +generateInvitationCode()
+    }
+
+    class Order {
+        +int id
+        +String invitationCode
+        +float finalAmount
+    }
+
+    %% 关系
+    InvitationRecord "1" o-- "0..*" InvitationService : "managed by"
+    InvitationRecord "1" o-- "0..*" Order : "triggered by"
+    User "1" *-- "0..*" InvitationRecord : "invites as inviter"
+    User "1" *-- "0..*" InvitationRecord : "invited as invitee"
+```
+
+### 3.4 点评系统模块
+
+```mermaid
+classDiagram
     class Review {
         +int id
         +int userId
@@ -194,7 +259,36 @@ classDiagram
         +issueReviewReward(int userId)
     }
 
-    %% 枚举类
+    class User {
+        +int id
+        +getReviewCount()
+    }
+
+    class Shop {
+        +int id
+        +List~Review~ reviews
+    }
+
+    %% 关系
+    Review "1" *-- "0..*" Reply : "has"
+    Review "1" o-- "0..*" ReviewService : "managed by"
+    User "1" *-- "0..*" Review : "writes"
+    User "1" *-- "0..*" Reply : "makes"
+    Shop "1" *-- "0..*" Review : "receives"
+```
+
+### 3.5 订单处理与服务依赖
+
+```mermaid
+classDiagram
+    class OrderService {
+        +createOrder(OrderRequest)
+        +validateInvitationCode(String)
+        +calculateOrderAmount(Order)
+        +processInvitationReward(Order)
+        +generateVoucherCode()
+    }
+
     class OrderStatus {
         <<enumeration>>
         PENDING
@@ -203,54 +297,20 @@ classDiagram
         CANCELLED
     }
 
-    class CouponType {
-        <<enumeration>>
-        DISCOUNT_RATE
-        FIXED_AMOUNT
-        NO_THRESHOLD
+    class Order {
+        +int id
+        +OrderStatus status
+        +calculateDiscount()
+        +applyInvitationCode()
+        +applyCoupon()
     }
-
-    class CouponStatus {
-        <<enumeration>>
-        AVAILABLE
-        USED
-        EXPIRED
-    }
-
-    class RewardType {
-        <<enumeration>>
-        REVIEW_REWARD
-        INVITATION_REWARD
-    }
-
-    %% 关系定义
-    User ||--o{ Order : "places"
-    User ||--o{ Review : "writes"
-    User ||--o{ Reply : "makes"
-    User ||--o{ InvitationRecord : "invites"
-    User ||--o{ RewardCoupon : "receives"
-
-    Shop ||--o{ Package : "offers"
-    Shop ||--o{ Review : "receives"
-    Package ||--o{ Order : "ordered"
-
-    Order }o--|| OrderService : "processed by"
-    Order }o--o| Coupon : "applies"
-
-    Review ||--o{ Reply : "has"
-    Review }o--|| ReviewService : "managed by"
-
-    Coupon }o--|| CouponService : "managed by"
-    RewardCoupon }o--|| Coupon : "references"
-
-    InvitationRecord }o--|| InvitationService : "managed by"
-    InvitationRecord }o--|| Order : "triggered by"
 
     %% 服务间依赖关系
     OrderService ..> InvitationService : "validates invitation"
     OrderService ..> CouponService : "applies coupon"
     ReviewService ..> CouponService : "issues review reward"
     InvitationService ..> CouponService : "issues invitation reward"
+    Order "1" o-- "0..* OrderService : "processed by"
 ```
 
 ### 设计要点说明
@@ -267,17 +327,17 @@ classDiagram
 ### 流程说明
 展示从"用户填写邀请码下单"开始到"邀请人获得奖励券"的完整业务流程。
 
+### 4.1 订单创建与邀请码验证阶段
+
 ```mermaid
 sequenceDiagram
     participant U as 新用户(Invitee)
     participant UI as 订单页面
     participant OS as OrderService
     participant IS as InvitationService
-    participant CS as CouponService
     participant DB as 数据库
-    participant I as 邀请人(Inviter)
 
-    Note over U, I: 用户填写邀请码下单流程
+    Note over U, DB: 第一阶段：订单创建与邀请码验证
 
     %% 1. 用户下单并填写邀请码
     U->>UI: 选择套餐，填写邀请码
@@ -302,11 +362,24 @@ sequenceDiagram
     alt 订单金额 >= 10元
         OS->>DB: 创建订单记录
         DB-->>OS: 订单创建成功
+        OS-->>UI: 返回订单信息
+        UI-->>U: 显示下单成功页面
     else 订单金额 < 10元
         OS-->>UI: 返回"订单金额需超过10元"
         UI-->>U: 显示错误信息
         Note over U: 流程结束
     end
+```
+
+### 4.2 邀请关系处理与奖励资格检查阶段
+
+```mermaid
+sequenceDiagram
+    participant OS as OrderService
+    participant IS as InvitationService
+    participant DB as 数据库
+
+    Note over OS, DB: 第二阶段：邀请关系处理与奖励资格检查
 
     %% 4. 记录邀请关系
     OS->>IS: processInvitationOrder(order)
@@ -319,44 +392,63 @@ sequenceDiagram
     DB-->>IS: 返回邀请次数
 
     alt 有效邀请次数达到2的倍数(2, 4, 6...)
-        Note over IS: 满足奖励条件
-        
-        %% 6. 发放邀请奖励券
-        IS->>CS: issueInvitationRewardCoupon(inviterId)
-        CS->>CS: 创建20元无门槛优惠券
-        CS->>DB: 保存优惠券记录
-        DB-->>CS: 优惠券创建成功
-        CS->>DB: 保存奖励券发放记录
-        DB-->>CS: 奖励记录保存成功
-        CS-->>IS: 奖励券发放成功
-        
-        %% 7. 更新邀请记录状态
-        IS->>DB: 更新邀请记录(rewardIssued=true)
-        DB-->>IS: 更新成功
-        
-        %% 8. 通知邀请人获得奖励（可选）
-        IS->>I: 发送奖励通知(推送/短信/邮件)
-        Note over I: 邀请人收到奖励通知
-        
+        Note over IS: 满足奖励条件，准备发放奖励
+        IS-->>OS: 奖励资格确认，需要发放奖励
     else 有效邀请次数未达到奖励条件
         Note over IS: 暂不发放奖励，等待下次邀请
+        IS-->>OS: 邀请处理完成，无需发放奖励
     end
+```
 
-    %% 9. 返回订单创建结果
-    IS-->>OS: 邀请处理完成
-    OS->>OS: generateVoucherCode()
-    OS-->>UI: 返回订单信息(orderId, voucherCode, amount)
-    UI-->>U: 显示下单成功页面
+### 4.3 奖励券发放与通知阶段
 
-    Note over U, I: 完整邀请奖励流程结束
+```mermaid
+sequenceDiagram
+    participant IS as InvitationService
+    participant CS as CouponService
+    participant DB as 数据库
+    participant I as 邀请人(Inviter)
 
-    %% 10. 邀请人查看奖励（异步）
+    Note over IS, I: 第三阶段：奖励券发放与通知
+
+    %% 6. 发放邀请奖励券
+    IS->>CS: issueInvitationRewardCoupon(inviterId)
+    CS->>CS: 创建20元无门槛优惠券
+    CS->>DB: 保存优惠券记录
+    DB-->>CS: 优惠券创建成功
+    CS->>DB: 保存奖励券发放记录
+    DB-->>CS: 奖励记录保存成功
+    CS-->>IS: 奖励券发放成功
+    
+    %% 7. 更新邀请记录状态
+    IS->>DB: 更新邀请记录(rewardIssued=true)
+    DB-->>IS: 更新成功
+    
+    %% 8. 通知邀请人获得奖励
+    IS->>I: 发送奖励通知(推送/短信/邮件)
+    Note over I: 邀请人收到奖励通知
+```
+
+### 4.4 邀请人查看奖励详情（异步）
+
+```mermaid
+sequenceDiagram
+    participant I as 邀请人(Inviter)
+    participant UI as 我的邀请页面
+    participant IS as InvitationService
+    participant DB as 数据库
+
+    Note over I, DB: 第四阶段：邀请人查看奖励详情（异步操作）
+
+    %% 10. 邀请人查看奖励
     I->>UI: 访问"我的邀请"页面
     UI->>IS: getInvitationRecords(inviterId)
     IS->>DB: 查询邀请记录和奖励券
-    DB-->>IS: 返回数据
+    DB-->>IS: 返回邀请数据和奖励历史
     IS-->>UI: 返回邀请统计信息
-    UI-->>I: 显示邀请进度和奖励券
+    UI-->>I: 显示邀请进度和奖励券列表
+
+    Note over I: 查看邀请成果和获得的奖励券
 ```
 
 ### 关键业务规则说明
