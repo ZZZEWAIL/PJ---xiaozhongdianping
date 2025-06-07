@@ -649,8 +649,22 @@ async function submitOrder() {
         });
 
         if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.detail || '订单提交失败');
+            try {
+                const errorData = await response.json();
+                console.error('后端返回的错误数据:', errorData); // 添加日志
+                showError(errorData.detail || '订单提交失败，请稍后重试');
+            } catch (err) {
+                console.error('解析后端错误响应失败:', err); // 添加日志
+                showError('订单提交失败，请稍后重试');
+                throw new Error('订单提交失败');
+            }
+
+            // 恢复按钮状态
+            const confirmBtn = document.getElementById('confirm-btn');
+            confirmBtn.disabled = false;
+            confirmBtn.innerHTML = '<i class="bi bi-check-circle me-1"></i> 确认支付';
+
+            return;
         }
 
         const orderResult = await response.json();
@@ -715,14 +729,21 @@ function showError(message) {
     const errorDiv = document.createElement('div');
     errorDiv.className = 'alert alert-danger alert-dismissible fade show';
     errorDiv.role = 'alert';
+    errorDiv.style.position = 'fixed'; // 固定位置
+    errorDiv.style.top = '50%'; // 垂直居中
+    errorDiv.style.left = '50%'; // 水平居中
+    errorDiv.style.transform = 'translate(-50%, -50%)'; // 偏移自身宽高的一半，居中
+    errorDiv.style.zIndex = '1050'; // 确保在最上层
+    errorDiv.style.maxWidth = '90%'; // 限制最大宽度
+    errorDiv.style.textAlign = 'center'; // 居中文本
     errorDiv.innerHTML = `
         ${message}
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     `;
 
-    // 插入到页面顶部
-    const container = document.querySelector('.container');
-    container.insertBefore(errorDiv, container.firstChild);
+    // 插入到页面中
+    document.body.appendChild(errorDiv);
+
 
     // 5秒后自动消失
     setTimeout(() => {
