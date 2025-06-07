@@ -9,9 +9,9 @@ from backend.filter_sort import router as filter_sort_router
 from backend.orders import router as orders_router
 from backend.coupons import router as coupons_router
 from backend.review import router as review_router
+from backend.invitation import router as invitation_router
 from fastapi.responses import JSONResponse
-from fastapi.exceptions import RequestValidationError
-from starlette.exceptions import HTTPException as StarletteHTTPException
+
 
 app = FastAPI(docs_url="/docs", redoc_url="/redoc")
 
@@ -30,6 +30,7 @@ app.include_router(filter_sort_router, prefix="/api", tags=["filter_sort"])
 app.include_router(orders_router,   prefix="/api",  tags=["orders"])
 app.include_router(coupons_router,  prefix="/api",  tags=["coupons"])
 app.include_router(review_router,  prefix="/api",  tags=["reviews"])
+app.include_router(invitation_router, prefix="/api", tags=["invitation"])
 
 
 from fastapi.staticfiles import StaticFiles

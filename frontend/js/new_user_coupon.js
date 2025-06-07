@@ -42,9 +42,9 @@ async function fetchNewUserCoupons() {
     try {
         const response = await fetch('/api/coupons/new_user/available', {
             method: 'GET',
+            credentials: 'include', // 确保请求携带 Cookie
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
             }
         });
         
@@ -90,9 +90,9 @@ async function claimCoupon(couponType, couponName) {
         
         const response = await fetch(`/api/coupons/new_user/claim/${couponType}`, {
             method: 'POST',
+            credentials: 'include', // 确保请求携带 Cookie
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
             }
         });
         

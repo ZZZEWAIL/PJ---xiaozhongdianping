@@ -407,7 +407,12 @@ async function submitReview(content) {
         
         // 显示成功模态框
         showSuccessModal(result);
-        
+
+        // 如果有奖励信息，显示奖励提示
+        if (result.reward) {
+            showSuccess(`恭喜您获得奖励券：${result.reward.coupon_name}，${result.reward.coupon_value}，有效期${result.reward.expiry_days}天`);
+        }
+
         // 刷新用户点评记录
         await fetchUserReviews();
         

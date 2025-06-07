@@ -501,37 +501,32 @@ async function validateInvitationCode() {
     try {
         showInvitationLoading();
         
-        // Mock验证 - 在实际项目中这里会调用后端API
-        await mockValidateInvitationCode(code);
-        
-    } catch (error) {
-        console.error('邀请码验证失败:', error);
-        showInvitationError(error.message || '邀请码验证失败');
-        isInvitationValid = false;
-    }
-}
+        // 调用后端接口验证邀请码
+        const response = await fetch(`${API_BASE}/invitation/validate`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify({ code })
+        });
 
-/**
- * Mock邀请码验证（模拟后端验证）
- * @param {string} code - 邀请码
- */
-async function mockValidateInvitationCode(code) {
-    // 模拟网络延迟
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    // 模拟验证逻辑
-    if (code === 'SELF01') {
-        throw new Error('不能使用自己的邀请码');
-    } else if (code === 'USED01') {
-        throw new Error('您已使用过邀请码，每个用户只能使用一次');
-    } else if (code === 'INVALID') {
-        throw new Error('邀请码不存在或已失效');
-    } else if (['ABC123', 'DEF456', 'GHI789'].includes(code)) {
-        // 模拟有效邀请码
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.detail || '邀请码验证失败');
+        }
+
+        const result = await response.json();
+
+        // 验证成功
         showInvitationSuccess();
         isInvitationValid = true;
-    } else {
-        throw new Error('邀请码格式错误或不存在');
+        console.log('邀请码验证成功:', result);
+        
+    } catch (error) {
+        console.error('邀请码验证失败:', error.message || error);
+        showInvitationError(error.message || '邀请码验证失败');
+        isInvitationValid = false;
     }
 }
 
@@ -617,7 +612,7 @@ async function submitOrder() {
         return;
     }
 
-    // 验证邀请码（如果启用）
+    // 验证邀请码
     const useInvitation = document.getElementById('use-invitation').checked;
     if (useInvitation && invitationCode) {
         if (!isInvitationValid) {
@@ -638,7 +633,7 @@ async function submitOrder() {
             coupon_id: selectedCoupon && document.getElementById('use-coupon').checked ? selectedCoupon.id : null
         };
 
-        // 添加邀请码（如果有效且启用）
+        // 添加邀请码
         if (useInvitation && isInvitationValid && invitationCode) {
             orderData.invitation_code = invitationCode;
         }

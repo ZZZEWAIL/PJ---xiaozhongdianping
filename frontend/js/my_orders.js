@@ -49,7 +49,10 @@ async function fetchOrders() {
         document.getElementById('error-container').style.display = 'none';
 
         const response = await fetch(
-            `${API_BASE}/user/orders?page=${currentPage}&page_size=${pageSize}`, {}
+            `${API_BASE}/user/orders?page=${currentPage}&page_size=${pageSize}`, {
+                method: 'GET',
+                credentials: 'include', // 确保请求携带 Cookie
+            }
         );
 
         console.log(response);
@@ -150,9 +153,21 @@ function updatePaginationControls() {
     // 更新页码信息
     document.getElementById('page-info').textContent = `第 ${currentPage} 页，共 ${totalPages} 页`;
 
+    // 获取分页按钮
+    const prevButton = document.getElementById('prev-page');
+    const nextButton = document.getElementById('next-page');
+
     // 更新按钮状态
     document.getElementById('prev-page').disabled = currentPage <= 1;
     document.getElementById('next-page').disabled = currentPage >= totalPages;
+
+    if (totalPages === 0) {
+        prevButton.disabled = true;
+        nextButton.disabled = true;
+    } else {
+        prevButton.disabled = currentPage <= 1;
+        nextButton.disabled = currentPage >= totalPages;
+    }
 }
 
 /**

@@ -42,7 +42,13 @@ document.addEventListener('DOMContentLoaded', () => {
  */
 async function fetchShopDetail() {
     try {
-        const response = await fetch(`${API_BASE}/shops/${shopId}?image_page=${currentImagePage}&image_page_size=${imagePageSize}`);
+        const response = await fetch(`${API_BASE}/shops/${shopId}?image_page=${currentImagePage}&image_page_size=${imagePageSize}`, {
+            method: 'GET',
+            credentials: 'include', // 确保请求携带 Cookie
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -103,7 +109,13 @@ async function fetchPackages() {
     try {
         const packagesContainer = document.getElementById('packages-container');
         
-        const response = await fetch(`${API_BASE}/shops/${shopId}/packages`);
+        const response = await fetch(`${API_BASE}/shops/${shopId}/packages`, {
+            method: 'GET',
+            credentials: 'include', // 确保请求携带 Cookie
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -182,17 +194,30 @@ function displayPackages(packages) {
  */
 async function fetchShopReviews(page = 1, sort = 'newest') {
     try {
-        const response = await fetch(`${API_BASE}/shops/${shopId}/reviews?page=${page}&limit=10&sort=${sort}`);
+        const response = await fetch(`${API_BASE}/shops/${shopId}/reviews?page=${page}&limit=10&sort=${sort}`, {
+            method: 'GET',
+            credentials: 'include', // 确保请求携带 Cookie
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
+        console.log('Fetched reviews data:', data); // 打印后端返回的数据
+
+        if (!data || !Array.isArray(data)) {
+            throw new Error('Invalid reviews data');
+        }
         
         if (page === 1) {
-            allReviews = data.reviews;
+            allReviews = data;
         } else {
-            allReviews = allReviews.concat(data.reviews);
+            allReviews = allReviews.concat(data);
         }
+
+        console.log('Fetched reviews data:', allReviews); // 打印后端返回的数据
         
         displayReviews(allReviews);
         updateReviewControls(data);
@@ -241,16 +266,19 @@ function displayReviews(reviews) {
  * @returns {string} HTML字符串
  */
 function generateReviewHtml(review, level = 0) {
+    console.log('Generating HTML for review:', review); // 添加调试日志
+
     const levelClass = level > 0 ? `reply-item level-${Math.min(level, 4)}` : '';
     const maxLevel = level >= 4 ? 'level-max' : '';
+    const username = review.username || "未知用户"; // 使用后端返回的 username
     
     let html = `
         <div class="review-item ${levelClass} ${maxLevel}" data-review-id="${review.id}">
             ${level > 0 ? '<div class="reply-indicator"></div>' : ''}
             <div class="review-header">
                 <div class="review-author">
-                    <div class="avatar">${review.username.charAt(0).toUpperCase()}</div>
-                    <span class="username">${escapeHtml(review.username)}</span>
+                    <div class="avatar">${username.charAt(0).toUpperCase()}</div>
+                    <span class="username">${escapeHtml(username)}</span>
                     <span class="review-time">${formatDateTime(review.created_at)}</span>
                 </div>
             </div>
@@ -450,7 +478,7 @@ async function submitReply(reviewId) {
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>发布中...';
         
-        const response = await fetch(`${API_BASE}/reviews/${reviewId}/replies`, {
+        const response = await fetch(`${API_BASE}/reviews/${reviewId}/reply`, {
             method: 'POST',
             credentials: 'include',
             headers: {
@@ -465,6 +493,7 @@ async function submitReply(reviewId) {
         }
         
         const result = await response.json();
+        console.log('Fetched reply data:', result);
         
         // 关闭模态框
         const modal = bootstrap.Modal.getInstance(document.getElementById('replyModal'));

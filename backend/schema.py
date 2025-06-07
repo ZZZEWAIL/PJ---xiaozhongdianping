@@ -74,6 +74,14 @@ class OrderCreated(BaseModel):
     order_amount: float   # 优惠后的实付金额
     created_at: datetime  # 下单时间
 
+class OrderListResponse(BaseModel):
+    """
+    用户订单列表响应，包含分页信息
+    """
+    page: int
+    total_pages: int
+    data: List[Order]
+
 
 # ---------------- 优惠券相关 ---------------- #
 class Coupon(BaseModel):
@@ -179,6 +187,7 @@ class ReviewReplyResponse(BaseModel):
     id: int
     review_id: int
     user_id: int
+    username: str  # 新增回复人用户名
     content: str
     created_at: datetime
     parent_reply_id: Optional[int] = None
@@ -190,6 +199,14 @@ class ReviewReplyResponse(BaseModel):
 
 ReviewReplyResponse.update_forward_refs()  # 处理自引用
 
+class ReviewReward(BaseModel):
+    """
+    奖励券信息结构
+    """
+    coupon_name: str
+    coupon_value: str
+    expiry_days: int
+
 
 class ReviewResponse(BaseModel):
     """
@@ -197,10 +214,26 @@ class ReviewResponse(BaseModel):
     """
     id: int
     user_id: int
+    username: str  # 新增点评人用户名
     shop_id: int
     content: str
     created_at: datetime
     replies: List[ReviewReplyResponse] = []  # 根级回复列表
+    reward: Optional[ReviewReward] = None  # 奖励券信息（可选）
 
     class Config:
         orm_mode = True
+
+# ---------- invitation 相关模型 ----------
+class InvitationCodeRequest(BaseModel):
+    code: str
+
+class RewardCoupon(BaseModel):
+    id: int
+    name: str
+    value: float
+    type: str
+    description: Optional[str] = None
+    issued_date: Optional[datetime] = None
+    expiry_date: Optional[datetime] = None
+    status: str

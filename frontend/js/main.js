@@ -1,40 +1,66 @@
 document.addEventListener('DOMContentLoaded', async function () {
+    // 退出登录
+    const logoutBtn = document.getElementById('logout-btn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', async function () {
+            try {
+                console.log('Logout button clicked'); // 添加调试日志
+                const response = await fetch('http://127.0.0.1:8000/auth/logout', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    console.log('Logout successful');
+                    window.location.href = 'login.html';
+                } else {
+                    const errorData = await response.json();
+                    console.error('Logout failed:', errorData);
+                    alert(`退出登录失败: ${errorData.detail || '未知错误'}`);
+                }
+            } catch (error) {
+                console.error('Network error:', error);
+                alert('网络错误，请检查控制台');
+            }
+        });
+    } else {
+        console.warn('Logout button not found');
+    }
+
     const sidebar = document.querySelector('.vertical-nav');
     const content = document.querySelector('.page-content');
     const errorMessage = document.getElementById('error-message');
+    const currentPage = window.location.pathname;
 
     // 验证用户是否已登录
-    try {
-        const response = await fetch('http://127.0.0.1:8000/auth/protected-endpoint', {
-            method: 'GET',
-            credentials: 'include',
-        });
+    if (currentPage.includes('index.html')) {
 
-        if (!response.ok) {
-            // 如果未登录或身份验证失败，显示提示
-            if (errorMessage) {
-                errorMessage.textContent = '请先登录';
+        try {
+            const response = await fetch('http://127.0.0.1:8000/auth/status', {
+                method: 'GET',
+                credentials: 'include',
+            });
+
+            if (!response.ok) {
+                console.log('User not authenticated, redirecting to login page.');
+                window.location.href = 'login.html'; // 跳转到登录页面
+                return;
             }
-            setTimeout(() => {
-                window.location.href = 'login.html';
-            }, 2000); // 延迟 2 秒后跳转
-            return;
-        }
 
-        const data = await response.json();
+            const data = await response.json();
+            console.log('User authenticated:', data);
 
-        // 动态显示用户名和登录时间
-        document.getElementById('username').textContent = data.username;
-        document.getElementById('login-time').textContent = new Date().toLocaleString();
-    } catch (error) {
-        console.error('Error:', error);
-        if (errorMessage) {
-            errorMessage.textContent = '网络错误，请稍后重试';
+            // 动态显示用户名和登陆时间
+            document.getElementById('username').textContent = data.username;
+            document.getElementById('login-time').textContent = new Date().toLocaleString();
+
+        } catch (error) {
+            console.error('Error checking authentication:', error);
+            window.location.href = 'login.html'; // 跳转到登录页面
         }
-        setTimeout(() => {
-            window.location.href = 'login.html';
-        }, 2000);
-        return;
     }
 
     // 切换侧边栏
@@ -44,23 +70,5 @@ document.addEventListener('DOMContentLoaded', async function () {
         content.classList.toggle('active');
     });
 
-    // 退出登录
-    document.getElementById('logout-btn').addEventListener('click', async function () {
-        try {
-            const response = await fetch('http://127.0.0.1:8000/auth/logout', {
-                method: 'POST',
-                credentials: 'include',
-            });
-
-            if (response.ok) {
-                window.location.href = 'login.html';
-            } else {
-                console.error('Logout failed');
-                alert('退出登录失败，请稍后重试');
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            alert('网络错误，请稍后重试');
-        }
-    });
+    
 });

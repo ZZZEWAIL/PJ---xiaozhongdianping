@@ -11,6 +11,8 @@ from backend.models import User
 from backend.utils import generate_captcha
 import os
 from dotenv import load_dotenv
+import random
+import string
 
 load_dotenv()
 
@@ -60,12 +62,17 @@ async def register(form: RegisterForm, response: Response, db: AsyncSession = De
 
     # 创建新用户
     password_hash = bcrypt.hashpw(form.password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-    new_user = User(username=form.username, password_hash=password_hash)
+    new_user = User(
+    username=form.username,
+    password_hash=password_hash,
+    invitation_code=''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+    )
     db.add(new_user)
     await db.commit()
 
     # 生成 JWT Token
     payload = {
+        "sub": str(new_user.id),  # 添加用户ID
         "username": form.username,
         "exp": datetime.datetime.utcnow() + datetime.timedelta(minutes=30)
     }
@@ -78,7 +85,7 @@ async def register(form: RegisterForm, response: Response, db: AsyncSession = De
         value=token,
         httponly=True,  # 禁止通过 JavaScript 访问
         secure=True,    # 在生产环境中启用 HTTPS
-        samesite="Strict",  # 防止跨站请求伪造 (CSRF)
+        samesite="Lax", 
         max_age=1800    # 设置 Cookie 的有效期（30 分钟）
     )
 

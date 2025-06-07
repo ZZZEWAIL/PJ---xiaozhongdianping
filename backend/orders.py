@@ -1,11 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 from datetime import datetime
 from typing import Dict, Any
 from backend.database import get_db
 from backend.models import Package, Order, Coupon, UserCoupon, CouponStatus, Shop, User
-from backend.schema import OrderCreate, OrderCreated
+from backend.schema import OrderCreate, OrderCreated, OrderListResponse
 from backend.login import get_current_user
 
 router = APIRouter()
@@ -150,3 +150,52 @@ async def create_order(order_data: OrderCreate,
         "order_amount": new_order.order_amount,
         "created_at": new_order.created_at
     }
+
+@router.get("/user/orders", response_model=OrderListResponse)
+async def get_user_orders(
+    page: int = Query(1, ge=1),
+    page_size: int = Query(10, ge=1, le=100),
+    db: AsyncSession = Depends(get_db),
+    current_user: Dict[str, Any] = Depends(get_current_user)
+):
+    """
+    获取用户订单列表，支持分页
+    """
+    user_id = current_user["id"]
+
+    # 查询订单总数
+    total_query = select(func.count(Order.id)).where(Order.user_id == user_id)
+    total_result = await db.execute(total_query)
+    total_count = total_result.scalar()
+    total_pages = (total_count + page_size - 1) // page_size
+
+    # 查询订单列表
+    query = (
+        select(Order, Package, Shop)
+        .join(Package, Order.package_id == Package.id)
+        .join(Shop, Package.shop_id == Shop.id)
+        .where(Order.user_id == user_id)
+        .order_by(Order.created_at.desc())
+        .offset((page - 1) * page_size)
+        .limit(page_size)
+    )
+
+    result = await db.execute(query)
+    orders = result.all()
+
+    order_list = [
+    {
+        "order_id": order.Order.id,
+        "package_title": order.Package.title,
+        "shop_name": order.Shop.name,
+        "created_at": order.Order.created_at.isoformat(),  # 确保日期格式化为 ISO 字符串
+        "voucher_code": None  # 不返回 voucher_code，与前端显示需求一致
+    }
+    for order in orders
+    ]
+
+    return OrderListResponse (
+        page=page,
+        total_pages=total_pages,
+        data=order_list
+    )

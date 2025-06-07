@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>我的订单 - 小众点评</title>
     <script>
-        fetch('/auth/status', { credentials: 'include' })
+        fetch('http://127.0.0.1:8000/auth/status', { credentials: 'include' })
             .then(res => {
                 if (!res.ok) {
                     location.href = 'login.html';
@@ -15,7 +15,6 @@
                 return res.json();
             })
             .then(data => {
-                // You can use data.username or data.id here if needed
                 console.log('User authenticated:', data.username);
             })
             .catch(error => {
@@ -31,7 +30,6 @@
 </head>
 
 <body>
-    <!-- NAVBAR -->
     <!-- NAVBAR -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <a class="navbar-brand d-flex align-items-center" href="#">

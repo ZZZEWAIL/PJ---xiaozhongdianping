@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Integer, String, Float, DateTime, Enum, ForeignKey, Boolean
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship
 import datetime
 import enum
 
@@ -105,6 +106,7 @@ class Order(Base):
     coupon_id = Column(Integer, ForeignKey('coupons.id'), nullable=True)
     order_amount = Column(Float, nullable=False)  # 优惠后金额
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    invitation_code = Column(String(6), nullable=True)  # 新增字段：邀请码
 
 # ---------------- 邀请码相关 ---------------- #
 class InvitationRecord(Base):
@@ -127,8 +129,11 @@ class Review(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)   # 点评人
     shop_id = Column(Integer, ForeignKey("shops.id"), nullable=False)   # 被点评商户
-    content = Column(String, nullable=False)                            # 点评内容
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    content = Column(String(255), nullable=False)                            # 点评内容
+    created_at = Column(DateTime, default=datetime.datetime.utcnow, nullable=False)
+
+    # 定义多对一关系：一个点评属于一个用户
+    user = relationship("User", backref="reviews")
 
     # 一对多：一个点评可拥有多条回复
     replies = relationship(
@@ -147,13 +152,16 @@ class ReviewReply(Base):
     id = Column(Integer, primary_key=True, index=True)
     review_id = Column(Integer, ForeignKey("reviews.id"), nullable=False)      # 所属点评
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)          # 回复人
-    content = Column(String, nullable=False)                                   # 回复内容
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    content = Column(String(255), nullable=False)                                   # 回复内容
+    created_at = Column(DateTime, default=datetime.datetime.utcnow, nullable=False)
     parent_reply_id = Column(Integer, ForeignKey("review_replies.id"))         # 父回复，可为空
+
+    # 关联用户
+    user = relationship("User", backref="replies")
 
     # 关联：所属点评
     review = relationship("Review", back_populates="replies")
     # 关联：父回复（自关联）
     parent_reply = relationship("ReviewReply", remote_side=[id])
     # 关联：子回复列表（自关联）
-    replies = relationship("ReviewReply")
+    replies = relationship("ReviewReply", overlaps="parent_reply")

@@ -8,7 +8,7 @@
  */
 
 // API URL
-const API_BASE_URL = '/api';
+const API_BASE_URL = 'http://127.0.0.1:8000/api';
 
 // DOM 元素
 const unusedContainer = document.getElementById('unused-container');
@@ -66,8 +66,8 @@ async function fetchCoupons() {
         // 发起API请求
         const response = await fetch(`${API_BASE_URL}/user/coupons`, {
             method: 'GET',
+            credentials: 'include', // 确保请求携带 Cookie
             headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`,
                 'Content-Type': 'application/json'
             }
         });

@@ -268,68 +268,65 @@ async def issue_coupon(
     - min_spend: 使用门槛（默认0）
     - expiry_days: 有效天数（默认7天）
     """
-    # 校验用户是否已领取该类型奖励
-    if coupon_type == "invitation":
-        result = await db.execute(
-            select(func.count(UserCoupon.id)).where(
-                UserCoupon.user_id == user_id,
-                UserCoupon.coupon_id.in_(
-                    select(Coupon.id).where(Coupon.name.like("邀请奖励券%"))
-                )
-            )
+    # # 校验用户是否已领取点评奖励
+    # if coupon_type == "review":
+    #     result = await db.execute(
+    #         select(func.count(UserCoupon.id)).where(
+    #             UserCoupon.user_id == user_id,
+    #             UserCoupon.coupon_id.in_(
+    #                 select(Coupon.id).where(Coupon.name.like("点评奖励券%"))
+    #             )
+    #         )
+    #     )
+    #     if result.scalar() > 0:
+    #         raise HTTPException(status_code=400, detail="您已领取过点评奖励券")
+    try:
+        # 定义优惠券参数
+        name = f"{coupon_type.capitalize()}奖励券"
+        description = f"无门槛{coupon_type}奖励券"
+        discount_type = DiscountType.fixed_amount if max_discount else DiscountType.discount
+        expiry_date = datetime.utcnow() + timedelta(days=expiry_days)
+
+        # 创建优惠券
+        coupon = Coupon(
+            name=name,
+            description=description,
+            discount_type=discount_type,
+            discount_value=discount_value,
+            min_spend=min_spend,
+            max_discount=max_discount,
+            expiry_date=expiry_date,
+            total_quantity=1,
+            remaining_quantity=1,
+            per_user_limit=1,
+            category="invitation" if coupon_type == "invitation" else "review",
         )
-        if result.scalar() > 0:
-            raise HTTPException(status_code=400, detail="您已领取过邀请奖励券")
-    elif coupon_type == "review":
-        result = await db.execute(
-            select(func.count(UserCoupon.id)).where(
-                UserCoupon.user_id == user_id,
-                UserCoupon.coupon_id.in_(
-                    select(Coupon.id).where(Coupon.name.like("点评奖励券%"))
-                )
-            )
+        db.add(coupon)
+        await db.commit()
+        await db.refresh(coupon)
+        print(f"Coupon created: {coupon}")
+
+
+        # 发放给用户
+        user_coupon = UserCoupon(
+            user_id=user_id,
+            coupon_id=coupon.id,
+            status=CouponStatus.unused,
+            expires_at=expiry_date
         )
-        if result.scalar() > 0:
-            raise HTTPException(status_code=400, detail="您已领取过点评奖励券")
+        db.add(user_coupon)
+        await db.commit()
+        print(f"User coupon issued: {user_coupon}")
 
-    # 定义优惠券参数
-    name = f"{coupon_type.capitalize()}奖励券"
-    description = f"无门槛{coupon_type}奖励券"
-    discount_type = DiscountType.FIXED_AMOUNT if max_discount else DiscountType.DISCOUNT
-    expiry_date = datetime.utcnow() + timedelta(days=expiry_days)
 
-    # 创建优惠券
-    coupon = Coupon(
-        name=name,
-        description=description,
-        discount_type=discount_type,
-        discount_value=discount_value,
-        min_spend=min_spend,
-        max_discount=max_discount,
-        expiry_date=expiry_date,
-        total_quantity=1,
-        remaining_quantity=1,
-        per_user_limit=1
-    )
-    db.add(coupon)
-    await db.commit()
-    await db.refresh(coupon)
-
-    # 发放给用户
-    user_coupon = UserCoupon(
-        user_id=user_id,
-        coupon_id=coupon.id,
-        status=CouponStatus.unused,
-        expires_at=expiry_date
-    )
-    db.add(user_coupon)
-    await db.commit()
-
-    return {
-        "message": f"成功发放{coupon_type}奖励券",
-        "coupon_id": user_coupon.id,
-        "expires_at": user_coupon.expires_at
-    }
+        return {
+            "message": f"成功发放{coupon_type}奖励券",
+            "coupon_id": user_coupon.id,
+            "expires_at": user_coupon.expires_at
+        }
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(status_code=500, detail=f"发放奖励券失败: {str(e)}")
 
 # ------------------------- 用户卡包（按状态分类） ------------------------- #
 @router.get("/user/coupons", response_model=CouponListResponse)

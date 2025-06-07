@@ -108,30 +108,27 @@ async function fetchInvitationRecords() {
 
 /**
  * 获取奖励券明细
- * MAY NEED REVIEW: 需要根据实际API设计调整
- * 假设API: GET /api/user/reward-coupons
  */
 async function fetchRewardCoupons() {
     try {
-        // Mock data for now - replace with actual API call
-        const mockData = {
-            coupons: [
-                {
-                    id: 1,
-                    name: "邀请奖励券",
-                    value: 20,
-                    type: "fixed",
-                    description: "无门槛20元优惠券",
-                    issued_date: "2025-05-20T10:30:00Z",
-                    expiry_date: "2025-05-27T23:59:59Z",
-                    status: "available"
-                }
-            ]
-        };
-        
-        rewardCoupons = mockData.coupons || [];
+        const response = await fetch(`${API_BASE}/invitation/rewards`, {
+            method: 'GET',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        console.log('Parsed reward coupons:', rewardCoupons);  // 添加日志
+        console.log('Reward coupons fetched:', data);  // 添加日志
+        rewardCoupons = data || [];
         displayRewardCoupons(rewardCoupons);
-        
+
     } catch (error) {
         console.error('Error fetching reward coupons:', error);
         displayRewardCouponsError();
@@ -177,10 +174,9 @@ function updateInvitationProgress(totalInvited = 0) {
     const remainingElement = document.getElementById('remaining-invites');
     const progressBar = document.getElementById('progress-bar');
     
-    // 每2人为一个奖励周期
-    const currentCycle = totalInvited % 2;
-    const remaining = 2 - currentCycle;
-    const progressPercent = (currentCycle / 2) * 100;
+    // 计算剩余邀请人数 (2 - (totalInvited % 2))
+    const remaining = totalInvited === 0 ? 2 : (2 - (totalInvited % 2));
+    const progressPercent = ((totalInvited % 2) / 2) * 100;
     
     totalElement.textContent = totalInvited.toString();
     remainingElement.textContent = remaining.toString();
@@ -188,8 +184,8 @@ function updateInvitationProgress(totalInvited = 0) {
     progressBar.style.width = `${progressPercent}%`;
     progressBar.setAttribute('aria-valuenow', progressPercent.toString());
     
-    // 如果已达成奖励条件，显示庆祝效果
-    if (currentCycle === 0 && totalInvited > 0) {
+    // 如果刚好完成一轮邀请
+    if (totalInvited > 0 && totalInvited % 2 === 0) {
         showRewardAchievement();
     }
 }
