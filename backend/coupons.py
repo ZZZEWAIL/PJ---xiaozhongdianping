@@ -268,18 +268,6 @@ async def issue_coupon(
     - min_spend: 使用门槛（默认0）
     - expiry_days: 有效天数（默认7天）
     """
-    # # 校验用户是否已领取点评奖励
-    # if coupon_type == "review":
-    #     result = await db.execute(
-    #         select(func.count(UserCoupon.id)).where(
-    #             UserCoupon.user_id == user_id,
-    #             UserCoupon.coupon_id.in_(
-    #                 select(Coupon.id).where(Coupon.name.like("点评奖励券%"))
-    #             )
-    #         )
-    #     )
-    #     if result.scalar() > 0:
-    #         raise HTTPException(status_code=400, detail="您已领取过点评奖励券")
     try:
         # 定义优惠券参数
         name = f"{coupon_type.capitalize()}奖励券"

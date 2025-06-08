@@ -100,6 +100,7 @@ async def record_invitation(db: AsyncSession, order: Order, inviter_id: int, inv
 
 async def award_invitation_coupon(db: AsyncSession, inviter_id: int):
     try:
+        # 查询用户的有效邀请记录数
         result = await db.execute(
             select(func.count()).where(
                 InvitationRecord.inviter_id == inviter_id,
@@ -107,13 +108,28 @@ async def award_invitation_coupon(db: AsyncSession, inviter_id: int):
             )
         )
         invitation_count = result.scalar()
-        print(f"Inviter {inviter_id} has {invitation_count} valid invitations.")  # 添加日志
+        print(f"用户 {inviter_id} 的有效邀请记录数：{invitation_count}")
 
-        if invitation_count % 2 == 0:  # 每2次发放
-            print(f"Awarding invitation reward coupon to user {inviter_id}.")  # 添加日志
-            await issue_coupon(
-                db, inviter_id, "invitation", discount_value=20.0, min_spend=0.0, expiry_days=7
+        # 查询用户已领取的邀请奖励券数量
+        result = await db.execute(
+            select(func.count(UserCoupon.id)).join(Coupon, UserCoupon.coupon_id == Coupon.id).where(
+                UserCoupon.user_id == inviter_id,
+                Coupon.category == "invitation"
             )
+        )
+        issued_coupons_count = result.scalar() or 0
+        print(f"用户 {inviter_id} 已领取的邀请奖励券数量：{issued_coupons_count}")
+
+        # 计算应发放的奖励券数量
+        eligible_coupons_count = invitation_count // 2
+        if eligible_coupons_count > issued_coupons_count:
+            # 发放新的奖励券
+            for _ in range(eligible_coupons_count - issued_coupons_count):
+                print(f"正在发放邀请奖励券给用户 {inviter_id}")
+                await issue_coupon(
+                    db, inviter_id, "invitation", discount_value=20.0, min_spend=0.0, expiry_days=7
+                )
+
     except Exception as e:
         # 记录日志
         print(f"Failed to award coupon for user {inviter_id}: {str(e)}")
